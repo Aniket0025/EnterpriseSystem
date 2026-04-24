@@ -104,9 +104,11 @@ export function AppSidebar() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <span className="text-primary-foreground font-bold text-sm">HR</span>
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="HR Portal Logo" 
+            className="h-10 w-10 md:h-12 md:w-12 rounded-lg shrink-0 object-contain"
+          />
           {!collapsed && (
             <div className="flex flex-col">
               <span className="font-semibold text-sm">HR & ERP</span>

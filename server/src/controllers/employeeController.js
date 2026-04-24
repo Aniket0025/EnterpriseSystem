@@ -38,3 +38,19 @@ export const createEmployee = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+export const updateEmployee = async (req, res) => {
+  const { id } = req.params;
+  const { name, phone, department, role, salary, status } = req.body;
+  try {
+    const employee = await Employee.findByIdAndUpdate(
+      id,
+      { name, phone, department, role, salary, status },
+      { new: true }
+    );
+    if (!employee) return res.status(404).json({ message: 'Employee not found' });
+    res.json(employee);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};

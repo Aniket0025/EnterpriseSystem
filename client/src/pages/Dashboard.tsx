@@ -1,25 +1,12 @@
-import { StatsCard } from "@/components/shared/StatsCard";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { Users, CheckSquare, DollarSign, UserPlus, TrendingUp, CalendarOff } from "lucide-react";
+import { StatsCard } from "@/components/shared/StatsCard";
+import { Users, CheckSquare, DollarSign, Briefcase, TrendingUp, CalendarOff, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
-const barData = [
-  { month: "Jan", hires: 4, exits: 1 },
-  { month: "Feb", hires: 6, exits: 2 },
-  { month: "Mar", hires: 3, exits: 1 },
-  { month: "Apr", hires: 8, exits: 0 },
-  { month: "May", hires: 5, exits: 3 },
-  { month: "Jun", hires: 7, exits: 1 },
-];
-
-const pieData = [
-  { name: "Engineering", value: 35 },
-  { name: "Marketing", value: 20 },
-  { name: "Sales", value: 25 },
-  { name: "HR", value: 10 },
-  { name: "Design", value: 10 },
-];
+const API_URL = "http://localhost:5000/api";
 
 const COLORS = [
   "hsl(221, 83%, 53%)",
@@ -29,35 +16,93 @@ const COLORS = [
   "hsl(0, 84%, 60%)",
 ];
 
-const performanceData = [
-  { month: "Jan", score: 72 },
-  { month: "Feb", score: 75 },
-  { month: "Mar", score: 80 },
-  { month: "Apr", score: 78 },
-  { month: "May", score: 85 },
-  { month: "Jun", score: 88 },
-];
-
-const recentActivities = [
-  { action: "New employee onboarded", who: "John Smith", time: "2 hours ago" },
-  { action: "Leave approved", who: "Sarah Wilson", time: "3 hours ago" },
-  { action: "Task completed", who: "Mike Johnson", time: "5 hours ago" },
-  { action: "Interview scheduled", who: "Emma Davis", time: "1 day ago" },
-  { action: "Payroll processed", who: "System", time: "1 day ago" },
-];
-
 export default function Dashboard() {
+  const { user } = useAuth();
+
+  const { data: dashboardData, isLoading, error } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/dashboard/stats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Failed to fetch dashboard data");
+      return res.json();
+    },
+    enabled: !!user
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error || !dashboardData) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center text-destructive">
+        Error loading dashboard data.
+      </div>
+    );
+  }
+
+  const { stats, charts, recentActivities } = dashboardData;
+
   return (
     <div>
       <PageHeader title="Dashboard" description="Welcome back! Here's your organization overview." />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-        <StatsCard title="Total Employees" value={248} change="+12 this month" changeType="positive" icon={Users} index={0} />
-        <StatsCard title="Active Tasks" value={42} change="8 overdue" changeType="negative" icon={CheckSquare} index={1} />
-        <StatsCard title="Monthly Payroll" value="$425K" change="+3.2%" changeType="neutral" icon={DollarSign} index={2} />
-        <StatsCard title="Open Positions" value={15} change="5 interviews today" changeType="neutral" icon={UserPlus} index={3} />
-        <StatsCard title="Avg Performance" value="85%" change="+5% vs last month" changeType="positive" icon={TrendingUp} index={4} />
-        <StatsCard title="Pending Leaves" value={7} change="3 urgent" changeType="negative" icon={CalendarOff} index={5} />
+        <StatsCard 
+          title="Total Employees" 
+          value={stats.totalEmployees} 
+          change="Active directory" 
+          changeType="neutral" 
+          icon={Users} 
+          index={0} 
+        />
+        <StatsCard 
+          title="Active Tasks" 
+          value={stats.activeTasks} 
+          change="Pending or in progress" 
+          changeType="neutral" 
+          icon={CheckSquare} 
+          index={1} 
+        />
+        <StatsCard 
+          title="Monthly Payroll" 
+          value={`$${(stats.monthlyPayroll / 1000).toFixed(1)}K`} 
+          change="Total paid this month" 
+          changeType="neutral" 
+          icon={DollarSign} 
+          index={2} 
+        />
+        <StatsCard 
+          title="Total Trainers" 
+          value={stats.totalTrainers} 
+          change="Active instructors" 
+          changeType="neutral" 
+          icon={Briefcase} 
+          index={3} 
+        />
+        <StatsCard 
+          title="Tasks Completed" 
+          value={stats.completedTasks} 
+          change="All time performance" 
+          changeType="positive" 
+          icon={TrendingUp} 
+          index={4} 
+        />
+        <StatsCard 
+          title="Pending Leaves" 
+          value={stats.pendingLeaves} 
+          change="Awaiting review" 
+          changeType="negative" 
+          icon={CalendarOff} 
+          index={5} 
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -67,15 +112,14 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <h3 className="font-semibold mb-4">Hiring vs Exits</h3>
+          <h3 className="font-semibold mb-4">Hiring Trend</h3>
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={barData}>
+            <BarChart data={charts.hiringTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 91%)" />
               <XAxis dataKey="month" fontSize={12} />
               <YAxis fontSize={12} />
               <Tooltip />
               <Bar dataKey="hires" fill="hsl(221, 83%, 53%)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="exits" fill="hsl(0, 84%, 60%)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </motion.div>
@@ -89,8 +133,8 @@ export default function Dashboard() {
           <h3 className="font-semibold mb-4">Department Distribution</h3>
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
-              <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={4} dataKey="value">
-                {pieData.map((_, i) => (
+              <Pie data={charts.departmentDistribution} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={4} dataKey="value">
+                {charts.departmentDistribution.map((_: any, i: number) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
               </Pie>
@@ -98,9 +142,9 @@ export default function Dashboard() {
             </PieChart>
           </ResponsiveContainer>
           <div className="flex flex-wrap gap-3 mt-2 justify-center">
-            {pieData.map((item, i) => (
+            {charts.departmentDistribution.map((item: any, i: number) => (
               <div key={item.name} className="flex items-center gap-1.5 text-xs">
-                <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: COLORS[i] }} />
+                <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
                 {item.name}
               </div>
             ))}
@@ -115,9 +159,9 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <h3 className="font-semibold mb-4">Performance Trend</h3>
+          <h3 className="font-semibold mb-4">Performance Trend (Tasks Completed)</h3>
           <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={performanceData}>
+            <LineChart data={charts.performanceTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 91%)" />
               <XAxis dataKey="month" fontSize={12} />
               <YAxis fontSize={12} />
@@ -135,7 +179,7 @@ export default function Dashboard() {
         >
           <h3 className="font-semibold mb-4">Recent Activity</h3>
           <div className="space-y-4">
-            {recentActivities.map((activity, i) => (
+            {recentActivities.map((activity: any, i: number) => (
               <motion.div
                 key={i}
                 className="flex items-start gap-3"
@@ -150,6 +194,9 @@ export default function Dashboard() {
                 </div>
               </motion.div>
             ))}
+            {recentActivities.length === 0 && (
+              <p className="text-xs text-muted-foreground text-center pt-4">No recent activity.</p>
+            )}
           </div>
         </motion.div>
       </div>

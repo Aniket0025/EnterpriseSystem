@@ -6,6 +6,9 @@ const batchSchema = new mongoose.Schema({
   trainer_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Trainer', required: false },
   start_date: { type: Date, required: true },
   end_date: { type: Date },
+  description: { type: String },
+  class_timing: { type: String },
+  days: { type: String },
   max_students: { type: Number, default: 30 },
   status: { type: String, enum: ['active', 'completed', 'upcoming'], default: 'active' }
 }, { timestamps: true });

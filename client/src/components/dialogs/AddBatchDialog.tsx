@@ -13,9 +13,18 @@ export function AddBatchDialog({ onSuccess }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const [trainers, setTrainers] = useState<{ id: string; name: string }[]>([]);
-  const [form, setForm] = useState({ name: "", course: "", trainer_id: "", start_date: "", end_date: "", max_students: 30 });
+  const [trainers, setTrainers] = useState<{ _id: string; name: string }[]>([]);
+  const [form, setForm] = useState({ name: "", course: "", trainer_id: "", start_date: "", end_date: "", max_students: 30, description: "", class_timing: "", days: "" });
 
+  const getDynamicStatus = () => {
+    if (!form.start_date) return "Upcoming";
+    const now = new Date();
+    const start = new Date(form.start_date);
+    const end = form.end_date ? new Date(form.end_date) : null;
+    if (now >= start && (!end || now <= end)) return "Active";
+    if (end && now > end) return "Completed";
+    return "Upcoming";
+  };
   useEffect(() => {
     if (open) {
       fetch("http://localhost:5000/api/trainers")
@@ -36,7 +45,7 @@ export function AddBatchDialog({ onSuccess }: Props) {
       });
       if (!res.ok) throw new Error(await res.text());
       toast({ title: "Batch created successfully!" });
-      setForm({ name: "", course: "", trainer_id: "", start_date: "", end_date: "", max_students: 30 });
+      setForm({ name: "", course: "", trainer_id: "", start_date: "", end_date: "", max_students: 30, description: "", class_timing: "", days: "" });
       setOpen(false);
       onSuccess?.();
     } catch (err: any) {
@@ -67,7 +76,7 @@ export function AddBatchDialog({ onSuccess }: Props) {
             <Select value={form.trainer_id} onValueChange={v => setForm({ ...form, trainer_id: v })}>
               <SelectTrigger><SelectValue placeholder="Select trainer" /></SelectTrigger>
               <SelectContent>
-                {trainers.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                {trainers.map(t => <SelectItem key={t._id} value={t._id}>{t.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -82,8 +91,28 @@ export function AddBatchDialog({ onSuccess }: Props) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Max Students</Label>
-            <Input type="number" min={1} value={form.max_students} onChange={e => setForm({ ...form, max_students: parseInt(e.target.value) || 30 })} />
+            <Label>Batch Description</Label>
+            <Input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="e.g. Intensive DSA preparation course" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>Class Timing</Label>
+              <Input value={form.class_timing} onChange={e => setForm({ ...form, class_timing: e.target.value })} placeholder="e.g. 7:00 PM - 9:00 PM" />
+            </div>
+            <div className="space-y-2">
+              <Label>Days</Label>
+              <Input value={form.days} onChange={e => setForm({ ...form, days: e.target.value })} placeholder="e.g. Mon-Fri" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+             <div className="space-y-2">
+               <Label>Max Students</Label>
+               <Input type="number" min={1} value={form.max_students} onChange={e => setForm({ ...form, max_students: parseInt(e.target.value) || 30 })} />
+             </div>
+             <div className="space-y-2">
+               <Label>Status (Auto)</Label>
+               <Input disabled value={getDynamicStatus()} className="bg-muted capitalize" />
+             </div>
           </div>
           <Button type="submit" className="w-full" disabled={loading}>{loading ? "Creating..." : "Create Batch"}</Button>
         </form>

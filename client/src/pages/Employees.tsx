@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -23,31 +23,52 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const columns = [
-  { key: "name", label: "Name" },
-  { key: "email", label: "Email" },
-  { key: "department", label: "Department" },
-  { key: "role", label: "Role" },
-  { key: "salary", label: "Salary" },
-  {
-    key: "status",
-    label: "Status",
-    render: (item: any) => (
-      <Badge variant={item.status === "Active" ? "default" : "secondary"}>
-        {item.status}
-      </Badge>
-    ),
-  },
-];
-
 export default function Employees() {
   const [search, setSearch] = useState("");
   const [employees, setEmployees] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const [editOpen, setEditOpen] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<any>(null);
   
   const [form, setForm] = useState({ name: "", email: "", phone: "", department: "", role: "", salary: "", password: "" });
+  
+  const columns = [
+    { key: "name", label: "Name" },
+    { key: "email", label: "Email" },
+    { key: "department", label: "Department" },
+    { key: "role", label: "Role" },
+    { key: "salary", label: "Salary" },
+    {
+      key: "status",
+      label: "Status",
+      render: (item: any) => (
+        <Badge variant={item.status === "Active" ? "default" : "secondary"}>
+          {item.status}
+        </Badge>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (item: any) => (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => {
+            setEditingEmployee(item);
+            setEditOpen(true);
+          }}
+        >
+          <Pencil className="h-4 w-4" />
+        </Button>
+      ),
+    },
+  ];
+
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
 
   const fetchEmployees = async () => {
     try {
@@ -79,6 +100,26 @@ export default function Employees() {
       toast({ title: "Creation Failed", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEditLoading(true);
+    try {
+      const res = await fetch(`http://localhost:5000/api/employees/${editingEmployee._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingEmployee)
+      });
+      if (!res.ok) throw new Error(await res.text());
+      toast({ title: "Employee updated successfully!" });
+      setEditOpen(false);
+      fetchEmployees();
+    } catch (err: any) {
+      toast({ title: "Update Failed", description: err.message, variant: "destructive" });
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -162,6 +203,61 @@ export default function Employees() {
       </motion.div>
 
       <DataTable columns={columns} data={filtered} />
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Employee</DialogTitle>
+          </DialogHeader>
+          {editingEmployee && (
+            <form className="space-y-4 mt-4" onSubmit={handleEditSubmit}>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Full Name</Label>
+                  <Input required value={editingEmployee.name} onChange={e=>setEditingEmployee({...editingEmployee, name: e.target.value})} />
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <Input value={editingEmployee.phone} onChange={e=>setEditingEmployee({...editingEmployee, phone: e.target.value})} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Department</Label>
+                  <Input value={editingEmployee.department} onChange={e=>setEditingEmployee({...editingEmployee, department: e.target.value})} />
+                </div>
+                <div>
+                  <Label>Role</Label>
+                  <Input value={editingEmployee.role} onChange={e=>setEditingEmployee({...editingEmployee, role: e.target.value})} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Salary</Label>
+                  <Input value={editingEmployee.salary} onChange={e=>setEditingEmployee({...editingEmployee, salary: e.target.value})} />
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Select
+                    value={editingEmployee.status || "Active"}
+                    onValueChange={(val) => setEditingEmployee({ ...editingEmployee, status: val })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Inactive">Inactive</SelectItem>
+                      <SelectItem value="On Leave">On Leave</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button type="submit" disabled={editLoading} className="w-full">{editLoading ? "Updating..." : "Update Employee"}</Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -7,8 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { Plus } from "lucide-react";
+
+const API_URL = "http://localhost:5000/api";
 
 interface Props { onSuccess?: () => void; }
 
@@ -24,14 +25,17 @@ export function ApplyLeaveDialog({ onSuccess }: Props) {
     if (!user) return;
     setLoading(true);
     try {
-      const { error } = await supabase.from("leaves").insert({
-        user_id: user.id,
-        leave_type: form.leave_type,
-        start_date: form.start_date,
-        end_date: form.end_date,
-        reason: form.reason || null,
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/leaves`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(form)
       });
-      if (error) throw error;
+      if (!res.ok) throw new Error(await res.text());
+      
       toast({ title: "Leave request submitted!" });
       setForm({ leave_type: "casual", start_date: "", end_date: "", reason: "" });
       setOpen(false);

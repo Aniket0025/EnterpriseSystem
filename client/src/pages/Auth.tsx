@@ -72,8 +72,12 @@ export default function Auth() {
         {/* Sign In / Sign Up Form */}
         <Card className="shadow-xl border-0 bg-card/80 backdrop-blur">
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-3 h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">HR</span>
+            <div className="mx-auto mb-3">
+              <img 
+                src="/logo.png" 
+                alt="HR Portal Logo" 
+                className="h-20 w-20 rounded-xl mx-auto"
+              />
             </div>
             <CardTitle className="text-2xl">
               {isSignUp ? "Create Account" : "Welcome Back"}

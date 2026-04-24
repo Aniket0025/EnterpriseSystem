@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { Plus } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+
+const API_URL = "http://localhost:5000/api";
 
 interface Props { onSuccess?: () => void; }
 
@@ -16,23 +17,37 @@ export function AddTaskDialog({ onSuccess }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
-  const [form, setForm] = useState({ title: "", description: "", priority: "medium", deadline: "" });
+  const [form, setForm] = useState({ title: "", description: "", priority: "medium", deadline: "", assigned_to: "" });
+
+  const { data: employees = [] } = useQuery({
+    queryKey: ["employees-for-tasks"],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/employees`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: open
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.from("tasks").insert({
-        title: form.title,
-        description: form.description || null,
-        priority: form.priority,
-        deadline: form.deadline || null,
-        assigned_by: user?.id || null,
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/tasks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(form)
       });
-      if (error) throw error;
+      if (!res.ok) throw new Error(await res.text());
       toast({ title: "Task created!" });
-      setForm({ title: "", description: "", priority: "medium", deadline: "" });
+      setForm({ title: "", description: "", priority: "medium", deadline: "", assigned_to: "" });
       setOpen(false);
       onSuccess?.();
     } catch (err: any) {
@@ -57,6 +72,17 @@ export function AddTaskDialog({ onSuccess }: Props) {
           <div className="space-y-2">
             <Label>Description</Label>
             <Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} />
+          </div>
+          <div className="space-y-2">
+            <Label>Assign To</Label>
+            <Select value={form.assigned_to} onValueChange={v => setForm({ ...form, assigned_to: v })}>
+              <SelectTrigger><SelectValue placeholder="Select Employee" /></SelectTrigger>
+              <SelectContent>
+                {employees.map((emp: any) => (
+                  <SelectItem key={emp.user_id} value={emp.user_id}>{emp.name} ({emp.department})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
