@@ -4,7 +4,7 @@ import cors from 'cors';
 import { connectDB } from './src/config/db.js';
 
 import authRoutes from './src/routes/authRoutes.js';
-import { employeeRoutes, trainerRoutes, batchRoutes, payrollRoutes, taskRoutes, leaveRoutes, dailyReportRoutes, dashboardRoutes } from './src/routes/index.js';
+import { employeeRoutes, trainerRoutes, batchRoutes, payrollRoutes, taskRoutes, leaveRoutes, dailyReportRoutes, dashboardRoutes, candidateRoutes, interviewRoutes, performanceRoutes, analyticsRoutes } from './src/routes/index.js';
 
 // Setup env variables
 dotenv.config();
@@ -23,6 +23,10 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/leaves', leaveRoutes);
 app.use('/api/reports', dailyReportRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/candidates', candidateRoutes);
+app.use('/api/interviews', interviewRoutes);
+app.use('/api/performance', performanceRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Main Entry Point
 app.get('/', (req, res) => {

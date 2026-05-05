@@ -7,13 +7,15 @@ employeeRoutes.route('/:id').put(updateEmployee);
 
 // trainerRoutes.js
 export const trainerRoutes = express.Router();
-import { getTrainers, createTrainer } from '../controllers/trainerController.js';
+import { getTrainers, createTrainer, updateTrainer } from '../controllers/trainerController.js';
 trainerRoutes.route('/').get(getTrainers).post(createTrainer);
+trainerRoutes.route('/:id').put(updateTrainer);
 
 // batchRoutes.js
 export const batchRoutes = express.Router();
-import { getBatches, createBatch } from '../controllers/batchController.js';
+import { getBatches, createBatch, updateBatch } from '../controllers/batchController.js';
 batchRoutes.route('/').get(getBatches).post(createBatch);
+batchRoutes.route('/:id').put(updateBatch);
 
 // payrollRoutes.js
 export const payrollRoutes = express.Router();
@@ -59,3 +61,24 @@ dailyReportRoutes.route('/:id/status').put(protect, updateReportStatus);
 export const dashboardRoutes = express.Router();
 import { getDashboardStats } from '../controllers/dashboardController.js';
 dashboardRoutes.route('/stats').get(protect, getDashboardStats);
+
+// candidateRoutes.js
+export const candidateRoutes = express.Router();
+import { getCandidates, createCandidate, updateCandidate } from '../controllers/candidateController.js';
+candidateRoutes.route('/').get(getCandidates).post(createCandidate);
+candidateRoutes.route('/:id').put(updateCandidate);
+
+// interviewRoutes.js
+export const interviewRoutes = express.Router();
+import { getInterviews, createInterview } from '../controllers/interviewController.js';
+interviewRoutes.route('/').get(getInterviews).post(createInterview);
+
+// performanceRoutes.js
+export const performanceRoutes = express.Router();
+import { getPerformanceData } from '../controllers/performanceController.js';
+performanceRoutes.route('/').get(getPerformanceData);
+
+// analyticsRoutes.js
+export const analyticsRoutes = express.Router();
+import { getAnalyticsData } from '../controllers/analyticsController.js';
+analyticsRoutes.route('/').get(getAnalyticsData);

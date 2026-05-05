@@ -5,24 +5,23 @@ import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-const employees = [
-  { name: "John Smith", department: "Engineering", tasksCompleted: 24, totalTasks: 28, rating: 4.5, trend: "up" },
-  { name: "Sarah Wilson", department: "Marketing", tasksCompleted: 18, totalTasks: 20, rating: 4.8, trend: "up" },
-  { name: "Mike Johnson", department: "Sales", tasksCompleted: 15, totalTasks: 22, rating: 3.9, trend: "down" },
-  { name: "Emma Davis", department: "Design", tasksCompleted: 20, totalTasks: 22, rating: 4.7, trend: "up" },
-  { name: "Alex Brown", department: "Engineering", tasksCompleted: 22, totalTasks: 25, rating: 4.2, trend: "stable" },
-];
-
-const monthlyData = [
-  { month: "Jan", avgScore: 78 },
-  { month: "Feb", avgScore: 80 },
-  { month: "Mar", avgScore: 82 },
-  { month: "Apr", avgScore: 85 },
-  { month: "May", avgScore: 83 },
-  { month: "Jun", avgScore: 88 },
-];
+import { useState, useEffect } from "react";
 
 export default function Performance() {
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [monthlyData, setMonthlyData] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/performance")
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          setEmployees(data.employees || []);
+          setMonthlyData(data.monthlyData || []);
+        }
+      })
+      .catch(err => console.error(err));
+  }, []);
   return (
     <div>
       <PageHeader title="Performance Management" description="Track and evaluate employee performance" />
@@ -64,9 +63,9 @@ export default function Performance() {
                 <div>
                   <div className="flex justify-between text-xs text-muted-foreground mb-1">
                     <span>Tasks: {emp.tasksCompleted}/{emp.totalTasks}</span>
-                    <span>{Math.round((emp.tasksCompleted / emp.totalTasks) * 100)}%</span>
+                    <span>{emp.totalTasks > 0 ? Math.round((emp.tasksCompleted / emp.totalTasks) * 100) : 0}%</span>
                   </div>
-                  <Progress value={(emp.tasksCompleted / emp.totalTasks) * 100} />
+                  <Progress value={emp.totalTasks > 0 ? (emp.tasksCompleted / emp.totalTasks) * 100 : 0} />
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Rating</span>

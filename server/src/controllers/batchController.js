@@ -28,3 +28,24 @@ export const createBatch = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+export const updateBatch = async (req, res) => {
+  try {
+    const { start_date, end_date } = req.body;
+    let status = req.body.status || 'upcoming';
+    if (start_date) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const start = new Date(start_date);
+      const end = end_date ? new Date(end_date) : null;
+      if (now >= start && (!end || now <= end)) status = 'active';
+      else if (end && now > end) status = 'completed';
+    }
+
+    const batch = await Batch.findByIdAndUpdate(req.params.id, { ...req.body, status }, { new: true });
+    if (!batch) return res.status(404).json({ message: 'Batch not found' });
+    res.json(batch);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};

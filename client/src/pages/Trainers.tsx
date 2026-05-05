@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable } from "@/components/shared/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { AddTrainerDialog } from "@/components/dialogs/AddTrainerDialog";
+import { EditTrainerDialog } from "@/components/dialogs/EditTrainerDialog";
 
 export default function Trainers() {
   const [trainers, setTrainers] = useState<any[]>([]);
@@ -29,6 +30,15 @@ export default function Trainers() {
       label: "Status",
       render: (item: any) => (
         <Badge variant={item.status === "active" ? "default" : "secondary"} className="capitalize">{item.status}</Badge>
+      ),
+    },
+    {
+      key: "actions",
+      label: "",
+      render: (item: any) => (
+        <div onClick={e => e.stopPropagation()}>
+          <EditTrainerDialog trainer={item} onSuccess={fetchTrainers} />
+        </div>
       ),
     },
   ];

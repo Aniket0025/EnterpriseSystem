@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Plus } from "lucide-react";
 
 interface Props { onSuccess?: () => void; }
@@ -20,14 +19,12 @@ export function AddCandidateDialog({ onSuccess }: Props) {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.from("recruitment").insert({
-        candidate_name: form.candidate_name,
-        email: form.email,
-        phone: form.phone || null,
-        position: form.position,
-        notes: form.notes || null,
+      const res = await fetch("http://localhost:5000/api/candidates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
       });
-      if (error) throw error;
+      if (!res.ok) throw new Error(await res.text());
       toast({ title: "Candidate added!" });
       setForm({ candidate_name: "", email: "", phone: "", position: "", notes: "" });
       setOpen(false);

@@ -4,18 +4,23 @@ import { DataTable } from "@/components/shared/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { StatsCard } from "@/components/shared/StatsCard";
 import { AddCandidateDialog } from "@/components/dialogs/AddCandidateDialog";
-import { supabase } from "@/integrations/supabase/client";
+import { EditCandidateDialog } from "@/components/dialogs/EditCandidateDialog";
 import { UserPlus, Users, CheckCircle, XCircle } from "lucide-react";
 
 export default function Recruitment() {
   const [candidates, setCandidates] = useState<any[]>([]);
 
-  const fetch = async () => {
-    const { data } = await supabase.from("recruitment").select("*").order("created_at", { ascending: false });
-    setCandidates(data || []);
+  const fetchCandidates = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/candidates");
+      const data = await res.json();
+      setCandidates(data || []);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => { fetchCandidates(); }, []);
 
   const statusVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
     applied: "outline", shortlisted: "secondary", interview: "default", selected: "default", rejected: "destructive",
@@ -27,6 +32,15 @@ export default function Recruitment() {
     { key: "email", label: "Email" },
     { key: "phone", label: "Phone", render: (item: any) => item.phone || "—" },
     { key: "status", label: "Status", render: (item: any) => <Badge variant={statusVariant[item.status] || "secondary"} className="capitalize">{item.status}</Badge> },
+    {
+      key: "actions",
+      label: "",
+      render: (item: any) => (
+        <div onClick={e => e.stopPropagation()}>
+          <EditCandidateDialog candidate={item} onSuccess={fetchCandidates} />
+        </div>
+      ),
+    },
   ];
 
   const selected = candidates.filter(c => c.status === "selected").length;
@@ -34,7 +48,7 @@ export default function Recruitment() {
 
   return (
     <div>
-      <PageHeader title="Recruitment" description="Track candidates and hiring pipeline" action={<AddCandidateDialog onSuccess={fetch} />} />
+      <PageHeader title="Recruitment" description="Track candidates and hiring pipeline" action={<AddCandidateDialog onSuccess={fetchCandidates} />} />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatsCard title="Total Applicants" value={candidates.length} icon={UserPlus} index={0} />
         <StatsCard title="In Pipeline" value={candidates.length - selected - rejected} icon={Users} index={1} />

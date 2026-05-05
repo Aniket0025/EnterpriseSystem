@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable } from "@/components/shared/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { AddBatchDialog } from "@/components/dialogs/AddBatchDialog";
+import { EditBatchDialog } from "@/components/dialogs/EditBatchDialog";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Batches() {
@@ -46,6 +47,15 @@ export default function Batches() {
         );
       },
     },
+    ...(isHR ? [{
+      key: "actions",
+      label: "",
+      render: (item: any) => (
+        <div onClick={e => e.stopPropagation()}>
+          <EditBatchDialog batch={item} onSuccess={fetchBatches} />
+        </div>
+      ),
+    }] : []),
   ];
 
   const filteredBatches = batches.filter(b => {

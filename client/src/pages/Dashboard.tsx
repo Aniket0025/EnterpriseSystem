@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatsCard } from "@/components/shared/StatsCard";
-import { Users, CheckSquare, DollarSign, Briefcase, TrendingUp, CalendarOff, Loader2 } from "lucide-react";
+import { Users, CheckSquare, IndianRupee, Briefcase, TrendingUp, CalendarOff, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 import { useQuery } from "@tanstack/react-query";
@@ -73,10 +73,10 @@ export default function Dashboard() {
         />
         <StatsCard 
           title="Monthly Payroll" 
-          value={`$${(stats.monthlyPayroll / 1000).toFixed(1)}K`} 
+          value={`₹${(stats.monthlyPayroll / 1000).toFixed(1)}K`} 
           change="Total paid this month" 
           changeType="neutral" 
-          icon={DollarSign} 
+          icon={IndianRupee} 
           index={2} 
         />
         <StatsCard 

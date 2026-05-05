@@ -4,7 +4,7 @@ import { DataTable } from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatsCard } from "@/components/shared/StatsCard";
-import { DollarSign, TrendingUp, TrendingDown, FileText, Edit2 } from "lucide-react";
+import { IndianRupee, TrendingUp, TrendingDown, FileText, Edit2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -86,10 +86,10 @@ export default function Payroll() {
       "Employee Name": item.employee_name,
       "Role": item.role,
       "Department": item.department,
-      "Base Salary ($)": item.base_salary,
-      "Bonus ($)": item.bonus,
-      "Deductions ($)": item.deductions,
-      "Net Pay ($)": item.net_pay,
+      "Base Salary (₹)": item.base_salary,
+      "Bonus (₹)": item.bonus,
+      "Deductions (₹)": item.deductions,
+      "Net Pay (₹)": item.net_pay,
       "Month": item.month,
       "Status": item.status
     }));
@@ -123,10 +123,10 @@ export default function Payroll() {
     { key: "employee_name", label: "Employee" },
     { key: "role", label: "Role" },
     { key: "department", label: "Department" },
-    { key: "base_salary", label: "Base Salary", render: (item: any) => `$${item.base_salary.toLocaleString()}` },
-    { key: "bonus", label: "Bonus", render: (item: any) => `$${item.bonus.toLocaleString()}` },
-    { key: "deductions", label: "Deductions", render: (item: any) => `$${item.deductions.toLocaleString()}` },
-    { key: "net_pay", label: "Net Pay", render: (item: any) => `$${item.net_pay.toLocaleString()}` },
+    { key: "base_salary", label: "Base Salary", render: (item: any) => `₹${item.base_salary.toLocaleString()}` },
+    { key: "bonus", label: "Bonus", render: (item: any) => `₹${item.bonus.toLocaleString()}` },
+    { key: "deductions", label: "Deductions", render: (item: any) => `₹${item.deductions.toLocaleString()}` },
+    { key: "net_pay", label: "Net Pay", render: (item: any) => `₹${item.net_pay.toLocaleString()}` },
     { key: "month", label: "Month" },
     {
       key: "status",
@@ -182,10 +182,10 @@ export default function Payroll() {
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatsCard title="Total Payroll" value={`$${(totalPayroll / 1000).toFixed(1)}K`} icon={DollarSign} index={0} />
-        <StatsCard title="Avg Salary" value={`$${Math.round(avgSalary).toLocaleString()}`} changeType="neutral" icon={TrendingUp} index={1} />
-        <StatsCard title="Total Bonuses" value={`$${(totalBonuses / 1000).toFixed(1)}K`} icon={TrendingUp} index={2} />
-        <StatsCard title="Total Deductions" value={`$${(totalDeductions / 1000).toFixed(1)}K`} icon={TrendingDown} index={3} />
+        <StatsCard title="Total Payroll" value={`₹${(totalPayroll / 1000).toFixed(1)}K`} icon={IndianRupee} index={0} />
+        <StatsCard title="Avg Salary" value={`₹${Math.round(avgSalary).toLocaleString()}`} changeType="neutral" icon={TrendingUp} index={1} />
+        <StatsCard title="Total Bonuses" value={`₹${(totalBonuses / 1000).toFixed(1)}K`} icon={TrendingUp} index={2} />
+        <StatsCard title="Total Deductions" value={`₹${(totalDeductions / 1000).toFixed(1)}K`} icon={TrendingDown} index={3} />
       </div>
 
       <motion.div
@@ -199,8 +199,8 @@ export default function Payroll() {
           <BarChart data={payrollChartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 91%)" />
             <XAxis dataKey="month" fontSize={12} />
-            <YAxis fontSize={12} tickFormatter={(v) => `$${v / 1000}K`} />
-            <Tooltip formatter={(v: number) => `$${v.toLocaleString()}`} />
+            <YAxis fontSize={12} tickFormatter={(v) => `₹${v / 1000}K`} />
+            <Tooltip formatter={(v: number) => `₹${v.toLocaleString()}`} />
             <Bar dataKey="total" fill="hsl(221, 83%, 53%)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>

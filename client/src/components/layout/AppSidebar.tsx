@@ -6,7 +6,7 @@ import {
   CheckSquare,
   FileText,
   CalendarOff,
-  DollarSign,
+  IndianRupee,
   UserPlus,
   CalendarClock,
   TrendingUp,
@@ -56,7 +56,7 @@ export function AppSidebar() {
   ];
 
   const hrNav = isHR ? [
-    { title: "Payroll", url: "/payroll", icon: DollarSign },
+    { title: "Payroll", url: "/payroll", icon: IndianRupee },
     { title: "Recruitment", url: "/recruitment", icon: UserPlus },
     { title: "Interviews", url: "/interviews", icon: CalendarClock },
     { title: "Performance", url: "/performance", icon: TrendingUp },

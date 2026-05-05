@@ -36,3 +36,13 @@ export const createTrainer = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+export const updateTrainer = async (req, res) => {
+  try {
+    const trainer = await Trainer.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!trainer) return res.status(404).json({ message: 'Trainer not found' });
+    res.json(trainer);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};

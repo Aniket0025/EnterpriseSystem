@@ -25,7 +25,7 @@ export const generatePayroll = async (req, res) => {
     for (const emp of employees) {
       const existing = await Payroll.findOne({ user_id: emp.user_id, month: currentMonth });
       if (!existing && emp.salary) {
-        // Assume salary is string like "$8,000" or just "8000"
+        // Assume salary is string like "₹8,000" or just "8000"
         const baseSalary = Number(String(emp.salary).replace(/[^0-9.-]+/g,"")) || 5000;
         const bonus = 0; // Default bonus
         const deductions = baseSalary * 0.1; // 10% deduction dummy logic

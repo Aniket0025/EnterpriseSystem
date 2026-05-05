@@ -170,7 +170,7 @@ export default function Employees() {
                   </div>
                   <div>
                     <Label>Salary</Label>
-                    <Input value={form.salary} onChange={e=>setForm({...form, salary: e.target.value})} placeholder="$75,000" />
+                    <Input value={form.salary} onChange={e=>setForm({...form, salary: e.target.value})} placeholder="₹75,000" />
                   </div>
                 </div>
                 <div>

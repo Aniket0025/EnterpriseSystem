@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Plus } from "lucide-react";
 
 interface Props { onSuccess?: () => void; }
@@ -14,12 +13,21 @@ export function ScheduleInterviewDialog({ onSuccess }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const [candidates, setCandidates] = useState<{ id: string; candidate_name: string; position: string }[]>([]);
+  const [candidates, setCandidates] = useState<{ _id: string; candidate_name: string; position: string; status: string }[]>([]);
   const [form, setForm] = useState({ recruitment_id: "", scheduled_at: "", meeting_link: "" });
 
   useEffect(() => {
     if (open) {
-      supabase.from("recruitment").select("id, candidate_name, position").then(({ data }) => setCandidates(data || []));
+      fetch("http://localhost:5000/api/candidates")
+        .then((res) => res.json())
+        .then((data) => {
+          // Filter to show only candidates that are applied, shortlisted, or interview
+          const validCandidates = (data || []).filter((c: any) => 
+            ['applied', 'shortlisted', 'interview'].includes(c.status)
+          );
+          setCandidates(validCandidates);
+        })
+        .catch((err) => console.error("Error fetching candidates:", err));
     }
   }, [open]);
 
@@ -27,12 +35,21 @@ export function ScheduleInterviewDialog({ onSuccess }: Props) {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.from("interviews").insert({
-        recruitment_id: form.recruitment_id,
-        scheduled_at: new Date(form.scheduled_at).toISOString(),
-        meeting_link: form.meeting_link || null,
+      const res = await fetch("http://localhost:5000/api/interviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recruitment_id: form.recruitment_id,
+          scheduled_at: new Date(form.scheduled_at).toISOString(),
+          meeting_link: form.meeting_link || null,
+        }),
       });
-      if (error) throw error;
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to schedule interview");
+      }
+
       toast({ title: "Interview scheduled!" });
       setForm({ recruitment_id: "", scheduled_at: "", meeting_link: "" });
       setOpen(false);
@@ -57,7 +74,7 @@ export function ScheduleInterviewDialog({ onSuccess }: Props) {
             <Select value={form.recruitment_id} onValueChange={v => setForm({ ...form, recruitment_id: v })}>
               <SelectTrigger><SelectValue placeholder="Select candidate" /></SelectTrigger>
               <SelectContent>
-                {candidates.map(c => <SelectItem key={c.id} value={c.id}>{c.candidate_name} — {c.position}</SelectItem>)}
+                {candidates.map(c => <SelectItem key={c._id} value={c._id}>{c.candidate_name} — {c.position} ({c.status})</SelectItem>)}
               </SelectContent>
             </Select>
           </div>

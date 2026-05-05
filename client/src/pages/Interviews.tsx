@@ -3,7 +3,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScheduleInterviewDialog } from "@/components/dialogs/ScheduleInterviewDialog";
-import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Video, Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
@@ -12,22 +11,24 @@ import { Button } from "@/components/ui/button";
 export default function Interviews() {
   const [interviews, setInterviews] = useState<any[]>([]);
 
-  const fetch = async () => {
-    const { data } = await supabase
-      .from("interviews")
-      .select("*, recruitment(candidate_name, position)")
-      .order("scheduled_at", { ascending: false });
-    setInterviews(data || []);
+  const fetchInterviews = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/interviews");
+      const data = await res.json();
+      setInterviews(data || []);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  useEffect(() => { fetch(); }, []);
+    useEffect(() => { fetchInterviews(); }, []);
 
   return (
     <div>
-      <PageHeader title="Interview Scheduling" description="Schedule and manage candidate interviews" action={<ScheduleInterviewDialog onSuccess={fetch} />} />
+      <PageHeader title="Interview Scheduling" description="Schedule and manage candidate interviews" action={<ScheduleInterviewDialog onSuccess={fetchInterviews} />} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {interviews.map((interview, i) => (
-          <motion.div key={interview.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
+          <motion.div key={interview._id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
             <Card className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
