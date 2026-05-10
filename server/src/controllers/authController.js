@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { dbConnected, dbConnectionError } from '../config/db.js';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -56,6 +57,16 @@ export const registerUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
+
+  // Check database connection first
+  if (!dbConnected) {
+    return res.status(503).json({
+      message: 'Database not connected.',
+      detail: dbConnectionError || 'Unknown connection error',
+      fix: 'Check MONGO_URI in Render dashboard. Ensure cluster name, username, password, and IP whitelist are correct.'
+    });
+  }
+
   try {
     const user = await User.findOne({ email });
     if (user && (await bcrypt.compare(password, user.password))) {
@@ -68,12 +79,6 @@ export const loginUser = async (req, res) => {
     }
   } catch (error) {
     console.error('Login error:', error.message);
-    // Check if MongoDB is connected
-    if (error.name === 'MongoServerSelectionError' || error.message.includes('connect')) {
-      return res.status(503).json({ 
-        message: 'Database connection failed. Please check MONGO_URI in Render dashboard.' 
-      });
-    }
     res.status(500).json({ message: error.message });
   }
 };

@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import { connectDB } from './src/config/db.js';
+import { connectDB, dbConnected, dbConnectionError } from './src/config/db.js';
 
 // Load environment variables from explicit path
 import path from 'path';
@@ -78,6 +78,30 @@ app.get('/', (req, res) => {
 // Health check endpoint for Render
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Debug endpoint to diagnose DB issues
+app.get('/api/debug', (req, res) => {
+  const mongoUri = process.env.MONGO_URI || '';
+  // Extract cluster name for diagnostics (hide password)
+  const clusterMatch = mongoUri.match(/@([^/\?]+)/);
+  const clusterName = clusterMatch ? clusterMatch[1] : 'not found';
+
+  res.json({
+    dbConnected: dbConnected,
+    dbConnectionError: dbConnectionError,
+    env: {
+      NODE_ENV: process.env.NODE_ENV || 'not set',
+      PORT: process.env.PORT || 'not set',
+      MONGO_URI_SET: !!process.env.MONGO_URI,
+      MONGO_CLUSTER: clusterName,
+      JWT_SECRET_SET: !!process.env.JWT_SECRET,
+      CLIENT_URL: process.env.CLIENT_URL || 'not set',
+      SUPER_ADMIN_KEY_SET: !!process.env.SUPER_ADMIN_KEY,
+    },
+    timestamp: new Date().toISOString(),
+    instructions: 'If dbConnected is false, check: 1) MONGO_URI cluster name is correct, 2) MongoDB Atlas IP whitelist includes 0.0.0.0/0, 3) Database user password is correct.'
+  });
 });
 
 const PORT = process.env.PORT || 5000;
