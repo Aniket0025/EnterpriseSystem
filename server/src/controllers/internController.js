@@ -135,6 +135,24 @@ export const getMeetingAttendance = async (req, res) => {
   } catch (err) { res.status(500).json({ message: err.message }); }
 };
 
+export const scheduleMeeting = async (req, res) => {
+  try {
+    const { internId } = req.params;
+    const { meeting_title, meeting_date, meeting_link, description } = req.body;
+    
+    const intern = await Intern.findById(internId);
+    if (!intern) return res.status(404).json({ message: 'Intern not found' });
+    
+    intern.scheduled_meetings.push({
+      meeting_title, meeting_date, meeting_link: meeting_link || '', description: description || '',
+      created_by: req.user._id
+    });
+    
+    await intern.save();
+    res.json(intern);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+};
+
 export const getMyInternProfile = async (req, res) => {
   try {
     const intern = await Intern.findOne({ user_id: req.user._id }).populate('user_id', 'full_name email');

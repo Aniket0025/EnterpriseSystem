@@ -3,6 +3,21 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import { connectDB } from './src/config/db.js';
 
+// Load environment variables from explicit path
+import path from 'path';
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+// Fallback environment variables for Render
+const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET'];
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0) {
+  console.error('Missing required environment variables:', missingVars.join(', '));
+  console.error('Please set these in your Render dashboard:');
+  missingVars.forEach(varName => console.error(`- ${varName}`));
+  process.exit(1);
+}
+
 import authRoutes from './src/routes/authRoutes.js';
 import notificationRoutes from './src/routes/notificationRoutes.js';
 import attendanceRoutes from './src/routes/attendanceRoutes.js';
@@ -10,8 +25,12 @@ import studentRoutes from './src/routes/studentRoutes.js';
 import internRoutes from './src/routes/internRoutes.js';
 import { employeeRoutes, trainerRoutes, batchRoutes, payrollRoutes, taskRoutes, leaveRoutes, dailyReportRoutes, dashboardRoutes, candidateRoutes, interviewRoutes, performanceRoutes, analyticsRoutes } from './src/routes/index.js';
 
-// Setup env variables
-dotenv.config();
+// Debug: Log environment variables (remove in production)
+console.log('Environment check:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('MONGO_URI exists:', !!process.env.MONGO_URI);
+console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
 
 const app = express();
 
@@ -56,8 +75,13 @@ app.get('/api/health', (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
+  try {
     await connectDB();
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (error) {
+    console.error('Failed to start server:', error.message);
+    // Don't exit - let Render handle the failure
+  }
 }
 
 startServer();

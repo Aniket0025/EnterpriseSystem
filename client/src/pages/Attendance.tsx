@@ -286,6 +286,8 @@ export default function Attendance() {
 
   const [historyMonth, setHistoryMonth] = useState(format(new Date(), "MM"));
   const [historyYear, setHistoryYear] = useState(format(new Date(), "yyyy"));
+  const [historyDate, setHistoryDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [historyFilterMode, setHistoryFilterMode] = useState<"month" | "date">("month");
   const [attendanceHistory, setAttendanceHistory] = useState<Record<string, any[]>>({});
   const [editingDate, setEditingDate] = useState<string | null>(null);
   const [editStatuses, setEditStatuses] = useState<Record<string, string>>({});

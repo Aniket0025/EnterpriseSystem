@@ -17,6 +17,14 @@ const internSchema = new mongoose.Schema({
     notes: { type: String, default: '' },
     marked_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     marked_at: { type: Date, default: Date.now }
+  }],
+  scheduled_meetings: [{
+    meeting_title: { type: String, required: true },
+    meeting_date: { type: Date, required: true },
+    meeting_link: { type: String, default: '' },
+    description: { type: String, default: '' },
+    created_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    created_at: { type: Date, default: Date.now }
   }]
 }, { timestamps: true });
 
