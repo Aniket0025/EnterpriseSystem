@@ -103,6 +103,45 @@ export const changePassword = async (req, res) => {
   }
 };
 
+export const updateUserRole = async (req, res) => {
+  const { user_id, new_role } = req.body;
+  
+  try {
+    // Only super_admin can change roles
+    const requestingUser = await User.findById(req.user._id);
+    if (!requestingUser || requestingUser.role !== 'super_admin') {
+      return res.status(403).json({ message: 'Only super admin can change user roles' });
+    }
+
+    const targetUser = await User.findById(user_id);
+    if (!targetUser) {
+      return res.status(404).json({ message: 'Target user not found' });
+    }
+
+    // Validate role
+    const validRoles = ['employee', 'hr_admin', 'super_admin', 'intern', 'trainer'];
+    if (!validRoles.includes(new_role)) {
+      return res.status(400).json({ message: 'Invalid role. Must be one of: ' + validRoles.join(', ') });
+    }
+
+    // Update user role
+    targetUser.role = new_role;
+    await targetUser.save();
+
+    res.json({ 
+      message: 'User role updated successfully',
+      user: {
+        _id: targetUser._id,
+        full_name: targetUser.full_name,
+        email: targetUser.email,
+        role: targetUser.role
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const superAdminSignup = async (req, res) => {
   const { email, password, full_name, admin_key, role } = req.body;
   
