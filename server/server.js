@@ -83,7 +83,9 @@ const startServer = async () => {
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   } catch (error) {
     console.error('Failed to start server:', error.message);
-    // Don't exit - let Render handle the failure
+    // Don't exit - keep server running even if DB fails initially
+    console.log('Starting server without database connection...');
+    app.listen(PORT, () => console.log(`Server running on port ${PORT} (DB connection failed)`));
   }
 }
 
