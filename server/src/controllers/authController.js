@@ -67,6 +67,13 @@ export const loginUser = async (req, res) => {
       res.status(401).json({ message: 'Invalid email or password' });
     }
   } catch (error) {
+    console.error('Login error:', error.message);
+    // Check if MongoDB is connected
+    if (error.name === 'MongoServerSelectionError' || error.message.includes('connect')) {
+      return res.status(503).json({ 
+        message: 'Database connection failed. Please check MONGO_URI in Render dashboard.' 
+      });
+    }
     res.status(500).json({ message: error.message });
   }
 };
