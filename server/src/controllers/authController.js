@@ -96,3 +96,53 @@ export const changePassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const superAdminSignup = async (req, res) => {
+  const { email, password, full_name, admin_key } = req.body;
+  
+  try {
+    // Verify admin key (you can set this as an environment variable)
+    const SUPER_ADMIN_KEY = process.env.SUPER_ADMIN_KEY || 'hrportal-super-admin-2024';
+    
+    if (admin_key !== SUPER_ADMIN_KEY) {
+      return res.status(403).json({ message: 'Invalid admin key' });
+    }
+
+    // Check if super admin already exists
+    const existingSuperAdmin = await User.findOne({ role: 'super_admin' });
+    if (existingSuperAdmin) {
+      return res.status(400).json({ message: 'Super admin already exists' });
+    }
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already exists' });
+    }
+
+    // Create super admin
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    
+    const superAdmin = await User.create({
+      full_name,
+      email,
+      password: hashedPassword,
+      role: 'super_admin',
+      status: 'active'
+    });
+
+    res.status(201).json({
+      message: 'Super admin created successfully',
+      user: {
+        _id: superAdmin._id,
+        full_name: superAdmin.full_name,
+        email: superAdmin.email,
+        role: superAdmin.role,
+        token: generateToken(superAdmin._id)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

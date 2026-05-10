@@ -14,6 +14,11 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET'];
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
+// Set default super admin key
+if (!process.env.SUPER_ADMIN_KEY) {
+  process.env.SUPER_ADMIN_KEY = 'hrportal-super-admin-2024';
+}
+
 if (missingVars.length > 0) {
   console.error('Missing required environment variables:', missingVars.join(', '));
   console.error('Please set these in your Render dashboard:');
