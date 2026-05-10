@@ -21,7 +21,27 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     
-    const user = await User.create({ email, password: hashedPassword, full_name, role: role || 'employee' });
+    // Allow super admin creation through regular registration
+    let userData = {
+      email,
+      password: hashedPassword,
+      full_name,
+      role: role || 'employee'
+    };
+    
+    // If creating super admin, require admin key
+    if (role === 'super_admin') {
+      const SUPER_ADMIN_KEY = process.env.SUPER_ADMIN_KEY || 'hrportal-super-admin-2024';
+      const { admin_key } = req.body;
+      
+      if (!admin_key || admin_key !== SUPER_ADMIN_KEY) {
+        return res.status(403).json({ message: 'Invalid admin key for super admin role' });
+      }
+      
+      userData.admin_key = admin_key;
+    }
+    
+    const user = await User.create(userData);
     
     if (user) {
       res.status(201).json({
