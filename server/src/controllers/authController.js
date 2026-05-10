@@ -104,19 +104,24 @@ export const superAdminSignup = async (req, res) => {
     // Verify admin key (you can set this as an environment variable)
     const SUPER_ADMIN_KEY = process.env.SUPER_ADMIN_KEY || 'hrportal-super-admin-2024';
     
-    if (admin_key !== SUPER_ADMIN_KEY) {
+    console.log('Super admin signup attempt:', { email, admin_key: admin_key ? 'provided' : 'missing' });
+    
+    if (!admin_key || admin_key !== SUPER_ADMIN_KEY) {
+      console.log('Invalid admin key provided');
       return res.status(403).json({ message: 'Invalid admin key' });
     }
 
     // Check if super admin already exists
     const existingSuperAdmin = await User.findOne({ role: 'super_admin' });
     if (existingSuperAdmin) {
+      console.log('Super admin already exists');
       return res.status(400).json({ message: 'Super admin already exists' });
     }
 
     // Check if email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log('Email already exists:', email);
       return res.status(400).json({ message: 'Email already exists' });
     }
 
@@ -124,6 +129,7 @@ export const superAdminSignup = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     
+    console.log('Creating super admin...');
     const superAdmin = await User.create({
       full_name,
       email,
@@ -132,6 +138,7 @@ export const superAdminSignup = async (req, res) => {
       status: 'active'
     });
 
+    console.log('Super admin created successfully!');
     res.status(201).json({
       message: 'Super admin created successfully',
       user: {
@@ -143,6 +150,7 @@ export const superAdminSignup = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Super admin signup error:', error);
     res.status(500).json({ message: error.message });
   }
 };
