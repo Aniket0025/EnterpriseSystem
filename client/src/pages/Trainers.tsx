@@ -4,13 +4,14 @@ import { DataTable } from "@/components/shared/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { AddTrainerDialog } from "@/components/dialogs/AddTrainerDialog";
 import { EditTrainerDialog } from "@/components/dialogs/EditTrainerDialog";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export default function Trainers() {
   const [trainers, setTrainers] = useState<any[]>([]);
 
   const fetchTrainers = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/trainers");
+      const res = await fetch(`${API_URL}/trainers`);
       const data = await res.json();
       setTrainers(data);
     } catch (err) {

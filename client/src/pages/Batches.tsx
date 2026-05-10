@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { AddBatchDialog } from "@/components/dialogs/AddBatchDialog";
 import { EditBatchDialog } from "@/components/dialogs/EditBatchDialog";
 import { useAuth } from "@/contexts/AuthContext";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export default function Batches() {
   const [batches, setBatches] = useState<any[]>([]);
@@ -13,7 +14,7 @@ export default function Batches() {
 
   const fetchBatches = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/batches");
+      const res = await fetch(`${API_URL}/batches`);
       const data = await res.json();
       setBatches(data);
     } catch (err) {

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export default function Landing() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
@@ -39,11 +39,16 @@ export default function Landing() {
 
             <div className="flex items-center gap-4">
               {user ? (
-                <Link to="/dashboard">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 shadow-md hover:shadow-lg transition-all">
-                    Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+                <>
+                  <Link to="/dashboard">
+                    <Button variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50 rounded-full px-6 shadow-sm transition-all">
+                      Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Button onClick={() => signOut()} variant="ghost" className="text-slate-600 hover:text-red-600 rounded-full px-4">
+                    Logout
                   </Button>
-                </Link>
+                </>
               ) : (
                 <Link to="/auth">
                   <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 shadow-md hover:shadow-lg transition-all">
@@ -78,11 +83,16 @@ export default function Landing() {
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
             {user ? (
-               <Link to="/dashboard">
-                 <Button size="lg" className="h-14 px-8 text-lg rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl hover:shadow-blue-500/25 transition-all">
-                   Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+               <>
+                 <Link to="/dashboard">
+                   <Button size="lg" className="h-14 px-8 text-lg rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl hover:shadow-blue-500/25 transition-all">
+                     Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                   </Button>
+                 </Link>
+                 <Button onClick={() => signOut()} size="lg" variant="outline" className="h-14 px-8 text-lg rounded-full border-slate-300 hover:bg-red-50 text-slate-700 hover:text-red-600 transition-all bg-white shadow-sm">
+                   Logout
                  </Button>
-               </Link>
+               </>
              ) : (
               <Link to="/auth">
                 <Button size="lg" className="h-14 px-8 text-lg rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl hover:shadow-blue-500/25 transition-all">
@@ -229,29 +239,29 @@ export default function Landing() {
              <div>
                 <h4 className="text-white font-semibold mb-6 flex items-center gap-2">Product</h4>
                 <ul className="space-y-3 text-sm">
-                  <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors">Updates</a></li>
+                  <li><Link to="/info/features" className="hover:text-white transition-colors">Features</Link></li>
+                  <li><Link to="/info/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                  <li><Link to="/info/security" className="hover:text-white transition-colors">Security</Link></li>
+                  <li><Link to="/info/updates" className="hover:text-white transition-colors">Updates</Link></li>
                 </ul>
              </div>
 
              <div>
                 <h4 className="text-white font-semibold mb-6">Company</h4>
                 <ul className="space-y-3 text-sm">
-                  <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                  <li><Link to="/info/about" className="hover:text-white transition-colors">About Us</Link></li>
+                  <li><Link to="/info/careers" className="hover:text-white transition-colors">Careers</Link></li>
+                  <li><Link to="/info/blog" className="hover:text-white transition-colors">Blog</Link></li>
+                  <li><Link to="/info/contact" className="hover:text-white transition-colors">Contact</Link></li>
                 </ul>
              </div>
 
              <div>
                 <h4 className="text-white font-semibold mb-6">Legal</h4>
                 <ul className="space-y-3 text-sm">
-                  <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors">Cookie Policy</a></li>
+                  <li><Link to="/info/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                  <li><Link to="/info/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                  <li><Link to="/info/cookies" className="hover:text-white transition-colors">Cookie Policy</Link></li>
                 </ul>
              </div>
           </div>

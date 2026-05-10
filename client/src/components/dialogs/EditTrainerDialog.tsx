@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Pencil } from "lucide-react";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 interface Props { 
   trainer: any;
@@ -27,7 +28,7 @@ export function EditTrainerDialog({ trainer, onSuccess }: Props) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/trainers/${trainer._id}`, {
+      const res = await fetch(`${API_URL}/trainers/${trainer._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)

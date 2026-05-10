@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Pencil } from "lucide-react";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 interface Props { 
   candidate: any;
@@ -30,7 +31,7 @@ export function EditCandidateDialog({ candidate, onSuccess }: Props) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/candidates/${candidate._id}`, {
+      const res = await fetch(`${API_URL}/candidates/${candidate._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)

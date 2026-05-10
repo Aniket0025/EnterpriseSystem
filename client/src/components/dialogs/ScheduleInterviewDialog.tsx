@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 interface Props { onSuccess?: () => void; }
 
@@ -18,7 +19,7 @@ export function ScheduleInterviewDialog({ onSuccess }: Props) {
 
   useEffect(() => {
     if (open) {
-      fetch("http://localhost:5000/api/candidates")
+      fetch(`${API_URL}/candidates`)
         .then((res) => res.json())
         .then((data) => {
           // Filter to show only candidates that are applied, shortlisted, or interview
@@ -35,7 +36,7 @@ export function ScheduleInterviewDialog({ onSuccess }: Props) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/interviews", {
+      const res = await fetch(`${API_URL}/interviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

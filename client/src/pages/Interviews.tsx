@@ -7,13 +7,14 @@ import { motion } from "framer-motion";
 import { Video, Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export default function Interviews() {
   const [interviews, setInterviews] = useState<any[]>([]);
 
   const fetchInterviews = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/interviews");
+      const res = await fetch(`${API_URL}/interviews`);
       const data = await res.json();
       setInterviews(data || []);
     } catch (err) {

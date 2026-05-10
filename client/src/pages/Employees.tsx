@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export default function Employees() {
   const [search, setSearch] = useState("");
@@ -72,7 +73,7 @@ export default function Employees() {
 
   const fetchEmployees = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/employees");
+      const res = await fetch(`${API_URL}/employees`);
       const data = await res.json();
       setEmployees(data);
     } catch (err) {
@@ -86,7 +87,7 @@ export default function Employees() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/employees", {
+      const res = await fetch(`${API_URL}/employees`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
@@ -107,7 +108,7 @@ export default function Employees() {
     e.preventDefault();
     setEditLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/employees/${editingEmployee._id}`, {
+      const res = await fetch(`${API_URL}/employees/${editingEmployee._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editingEmployee)

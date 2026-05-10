@@ -6,13 +6,14 @@ import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 import { useState, useEffect } from "react";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export default function Performance() {
   const [employees, setEmployees] = useState<any[]>([]);
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/performance")
+    fetch(`${API_URL}/performance`)
       .then(res => res.json())
       .then(data => {
         if (data) {

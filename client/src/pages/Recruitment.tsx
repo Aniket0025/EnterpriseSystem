@@ -6,13 +6,14 @@ import { StatsCard } from "@/components/shared/StatsCard";
 import { AddCandidateDialog } from "@/components/dialogs/AddCandidateDialog";
 import { EditCandidateDialog } from "@/components/dialogs/EditCandidateDialog";
 import { UserPlus, Users, CheckCircle, XCircle } from "lucide-react";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export default function Recruitment() {
   const [candidates, setCandidates] = useState<any[]>([]);
 
   const fetchCandidates = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/candidates");
+      const res = await fetch(`${API_URL}/candidates`);
       const data = await res.json();
       setCandidates(data || []);
     } catch (err) {

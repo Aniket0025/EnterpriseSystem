@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   Users,
   GraduationCap,
+  BookOpen,
   Layers,
   CheckSquare,
   FileText,
@@ -10,11 +11,11 @@ import {
   UserPlus,
   CalendarClock,
   TrendingUp,
-  Bell,
   BarChart3,
   Settings,
   LogOut,
   Clock,
+  Briefcase,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -45,6 +46,8 @@ export function AppSidebar() {
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
     ...(isHR ? [{ title: "Employees", url: "/employees", icon: Users }] : []),
     ...(isHR ? [{ title: "Trainers", url: "/trainers", icon: GraduationCap }] : []),
+    ...(isHR ? [{ title: "Students", url: "/students", icon: BookOpen }] : []),
+    ...(isHR ? [{ title: "Interns", url: "/interns", icon: Briefcase }] : []),
     { title: "Batches", url: "/batches", icon: Layers },
   ];
 
@@ -63,7 +66,6 @@ export function AppSidebar() {
   ] : [];
 
   const systemNav = [
-    { title: "Notifications", url: "/notifications", icon: Bell },
     ...(isHR ? [{ title: "Reports", url: "/reports", icon: BarChart3 }] : []),
   ];
 

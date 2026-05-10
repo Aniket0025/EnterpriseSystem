@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 interface Props { onSuccess?: () => void; }
 
@@ -27,7 +28,7 @@ export function AddBatchDialog({ onSuccess }: Props) {
   };
   useEffect(() => {
     if (open) {
-      fetch("http://localhost:5000/api/trainers")
+      fetch(`${API_URL}/trainers`)
         .then(res => res.json())
         .then(data => setTrainers(data || []))
         .catch(err => console.error(err));
@@ -38,7 +39,7 @@ export function AddBatchDialog({ onSuccess }: Props) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/batches", {
+      const res = await fetch(`${API_URL}/batches`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)

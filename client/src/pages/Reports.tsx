@@ -14,6 +14,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const reportTypes = [
   { title: "Employee Report", type: "employee", description: "Headcount, departments, roles distribution", icon: Users, color: "bg-primary/10 text-primary" },
@@ -29,7 +30,7 @@ export default function Reports() {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/analytics?year=${selectedYear}`)
+    fetch(`${API_URL}/analytics?year=${selectedYear}`)
       .then(res => res.json())
       .then(data => {
         if (data && data.quarterlyData) {
@@ -39,30 +40,14 @@ export default function Reports() {
       .catch(err => console.error(err));
   }, [selectedYear]);
 
-  const downloadCSV = (data: any[], filename: string) => {
-    if (!data || data.length === 0) {
+  const downloadCSV = (headers: string[], rows: string[][], filename: string) => {
+    if (!rows || rows.length === 0) {
       toast({ title: "No data available to download", variant: "destructive" });
       return;
     }
-    
-    // Flatten nested objects if necessary or just stringify
-    const processRow = (row: any) => {
-      let processedRow: any = {};
-      Object.keys(row).forEach(key => {
-        if (typeof row[key] === 'object' && row[key] !== null) {
-           processedRow[key] = JSON.stringify(row[key]);
-        } else {
-           processedRow[key] = row[key];
-        }
-      });
-      return processedRow;
-    };
-
-    const flatData = data.map(processRow);
-    const headers = Object.keys(flatData[0]);
     const csvContent = [
       headers.join(','),
-      ...flatData.map(row => headers.map(fieldName => JSON.stringify(row[fieldName] || '')).join(','))
+      ...rows.map(row => row.map(cell => `"${String(cell || '').replace(/"/g, '""')}"`).join(','))
     ].join('\r\n');
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -76,17 +61,81 @@ export default function Reports() {
     document.body.removeChild(link);
   };
 
+  const formatEmployeeData = (data: any[]) => {
+    const headers = ["S.No", "Name", "Email", "Phone", "Department", "Role", "Salary", "Status", "Joining Date"];
+    const rows = data.map((emp, i) => [
+      String(i + 1),
+      emp.name || emp.full_name || "",
+      emp.email || "",
+      emp.phone || "",
+      emp.department || "",
+      emp.role || "",
+      String(emp.salary || 0),
+      emp.status || "",
+      emp.createdAt ? new Date(emp.createdAt).toLocaleDateString() : ""
+    ]);
+    return { headers, rows };
+  };
+
+  const formatPayrollData = (data: any[]) => {
+    const headers = ["S.No", "Employee Name", "Role", "Department", "Base Salary", "Bonus", "Deductions", "Net Pay", "Month", "Status"];
+    const rows = data.map((p, i) => [
+      String(i + 1),
+      p.employee_name || "",
+      p.role || "",
+      p.department || "",
+      String(p.base_salary || 0),
+      String(p.bonus || 0),
+      String(p.deductions || 0),
+      String(p.net_pay || 0),
+      p.month || "",
+      p.status || ""
+    ]);
+    return { headers, rows };
+  };
+
+  const formatTaskData = (data: any[]) => {
+    const headers = ["S.No", "Title", "Priority", "Status", "Assigned To", "Deadline", "Submitted", "Created Date"];
+    const rows = data.map((t, i) => [
+      String(i + 1),
+      t.title || "",
+      t.priority || "",
+      t.status || "",
+      t.assigned_to?.full_name || t.assigned_to?.name || "",
+      t.deadline ? new Date(t.deadline).toLocaleDateString() : "",
+      t.submission?.submittedAt ? new Date(t.submission.submittedAt).toLocaleDateString() : "No",
+      t.createdAt ? new Date(t.createdAt).toLocaleDateString() : ""
+    ]);
+    return { headers, rows };
+  };
+
+  const formatLeaveData = (data: any[]) => {
+    const headers = ["S.No", "Employee", "Leave Type", "Start Date", "End Date", "Reason", "Status", "Applied On"];
+    const rows = data.map((l, i) => [
+      String(i + 1),
+      l.user_id?.full_name || l.user_id?.name || "",
+      l.leave_type || "",
+      l.start_date ? new Date(l.start_date).toLocaleDateString() : "",
+      l.end_date ? new Date(l.end_date).toLocaleDateString() : "",
+      l.reason || "",
+      l.status || "",
+      l.createdAt ? new Date(l.createdAt).toLocaleDateString() : ""
+    ]);
+    return { headers, rows };
+  };
+
   const handleDownload = async (type: string) => {
     setIsDownloading(true);
     try {
       let url = "";
       let filename = "";
+      let formatter: (data: any[]) => { headers: string[], rows: string[][] };
       
       switch(type) {
-        case 'employee': url = "http://localhost:5000/api/employees"; filename = "employee_report"; break;
-        case 'payroll': url = "http://localhost:5000/api/payroll"; filename = "payroll_report"; break;
-        case 'task': url = "http://localhost:5000/api/tasks"; filename = "task_report"; break;
-        case 'leave': url = "http://localhost:5000/api/leaves"; filename = "leave_report"; break;
+        case 'employee': url = `${API_URL}/employees`; filename = "employee_report"; formatter = formatEmployeeData; break;
+        case 'payroll': url = `${API_URL}/payroll`; filename = "payroll_report"; formatter = formatPayrollData; break;
+        case 'task': url = `${API_URL}/tasks`; filename = "task_report"; formatter = formatTaskData; break;
+        case 'leave': url = `${API_URL}/leaves`; filename = "leave_report"; formatter = formatLeaveData; break;
       }
       
       const token = localStorage.getItem('token');
@@ -94,7 +143,8 @@ export default function Reports() {
       if (!res.ok) throw new Error("Failed to fetch data");
       
       const data = await res.json();
-      downloadCSV(data, filename);
+      const { headers, rows } = formatter(data);
+      downloadCSV(headers, rows, filename);
       toast({ title: `${filename}.csv downloaded successfully!` });
     } catch (err) {
       console.error(err);

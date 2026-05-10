@@ -22,6 +22,9 @@ import Notifications from "./pages/Notifications";
 import Reports from "./pages/Reports";
 import SettingsPage from "./pages/Settings";
 import Attendance from "./pages/Attendance";
+import FooterPage from "./pages/FooterPage";
+import Students from "./pages/Students";
+import Interns from "./pages/Interns";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,7 +38,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
@@ -52,10 +55,24 @@ function AuthRoute() {
   return <Auth />;
 }
 
+function GuestRoute() {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+  if (user) return <Navigate to="/dashboard" replace />;
+  return <Landing />;
+}
+
 const AppRoutes = () => (
   <Routes>
-    <Route path="/" element={<Landing />} />
+    <Route path="/" element={<GuestRoute />} />
     <Route path="/auth" element={<AuthRoute />} />
+    <Route path="/info/:slug" element={<FooterPage />} />
     <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/employees" element={<Employees />} />
@@ -72,6 +89,8 @@ const AppRoutes = () => (
       <Route path="/reports" element={<Reports />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/attendance" element={<Attendance />} />
+      <Route path="/students" element={<Students />} />
+      <Route path="/interns" element={<Interns />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>
