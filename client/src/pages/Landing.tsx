@@ -12,6 +12,7 @@ import {
   Zap,
   Globe
 } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export default function Landing() {
   const { user, signOut } = useAuth();
@@ -24,9 +25,9 @@ export default function Landing() {
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-2">
               <img 
-                src="/logo.png" 
+                src={logo} 
                 alt="HR Portal Logo" 
-                className="h-16 w-16 rounded-xl"
+                className="h-12 w-12 object-contain"
               />
               <span className="text-xl font-bold text-slate-900 tracking-tight">HR Portal</span>
             </div>
@@ -216,9 +217,9 @@ export default function Landing() {
              <div className="col-span-1 md:col-span-1">
                 <div className="flex items-center gap-2 mb-6">
                   <img 
-                    src="/logo.png" 
+                    src={logo} 
                     alt="HR Portal Logo" 
-                    className="h-16 w-16 rounded-xl"
+                    className="h-12 w-12 object-contain"
                   />
                   <span className="text-2xl font-bold text-white tracking-tight">HR Portal</span>
                 </div>

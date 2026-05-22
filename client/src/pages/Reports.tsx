@@ -40,6 +40,12 @@ export default function Reports() {
       .catch(err => console.error(err));
   }, [selectedYear]);
 
+  const formatDate = (dateString?: string | Date) => {
+    if (!dateString) return "";
+    const d = new Date(dateString);
+    return isNaN(d.getTime()) ? "" : d.toLocaleDateString();
+  };
+
   const downloadCSV = (headers: string[], rows: string[][], filename: string) => {
     if (!rows || rows.length === 0) {
       toast({ title: "No data available to download", variant: "destructive" });
@@ -47,10 +53,16 @@ export default function Reports() {
     }
     const csvContent = [
       headers.join(','),
-      ...rows.map(row => row.map(cell => `"${String(cell || '').replace(/"/g, '""')}"`).join(','))
+      ...rows.map(row => 
+        row.map(cell => {
+          const cellStr = String(cell || '').replace(/\r?\n|\r/g, ' ');
+          return `"${cellStr.replace(/"/g, '""')}"`;
+        }).join(',')
+      )
     ].join('\r\n');
     
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    // Add \uFEFF BOM for Microsoft Excel UTF-8 recognition
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
@@ -62,7 +74,7 @@ export default function Reports() {
   };
 
   const formatEmployeeData = (data: any[]) => {
-    const headers = ["S.No", "Name", "Email", "Phone", "Department", "Role", "Salary", "Status", "Joining Date"];
+    const headers = ["S.No", "Name", "Email", "Phone", "Department", "Role", "Salary (INR)", "Status", "Joining Date"];
     const rows = data.map((emp, i) => [
       String(i + 1),
       emp.name || emp.full_name || "",
@@ -72,13 +84,13 @@ export default function Reports() {
       emp.role || "",
       String(emp.salary || 0),
       emp.status || "",
-      emp.createdAt ? new Date(emp.createdAt).toLocaleDateString() : ""
+      formatDate(emp.createdAt)
     ]);
     return { headers, rows };
   };
 
   const formatPayrollData = (data: any[]) => {
-    const headers = ["S.No", "Employee Name", "Role", "Department", "Base Salary", "Bonus", "Deductions", "Net Pay", "Month", "Status"];
+    const headers = ["S.No", "Employee Name", "Role", "Department", "Base Salary (INR)", "Bonus (INR)", "Deductions (INR)", "Net Pay (INR)", "Month", "Status"];
     const rows = data.map((p, i) => [
       String(i + 1),
       p.employee_name || "",
@@ -95,16 +107,16 @@ export default function Reports() {
   };
 
   const formatTaskData = (data: any[]) => {
-    const headers = ["S.No", "Title", "Priority", "Status", "Assigned To", "Deadline", "Submitted", "Created Date"];
+    const headers = ["S.No", "Title", "Priority", "Status", "Assigned To", "Deadline", "Submitted On", "Created Date"];
     const rows = data.map((t, i) => [
       String(i + 1),
       t.title || "",
       t.priority || "",
       t.status || "",
       t.assigned_to?.full_name || t.assigned_to?.name || "",
-      t.deadline ? new Date(t.deadline).toLocaleDateString() : "",
-      t.submission?.submittedAt ? new Date(t.submission.submittedAt).toLocaleDateString() : "No",
-      t.createdAt ? new Date(t.createdAt).toLocaleDateString() : ""
+      formatDate(t.deadline),
+      t.submission?.submitted_at ? formatDate(t.submission.submitted_at) : "No",
+      formatDate(t.createdAt)
     ]);
     return { headers, rows };
   };
@@ -115,11 +127,11 @@ export default function Reports() {
       String(i + 1),
       l.user_id?.full_name || l.user_id?.name || "",
       l.leave_type || "",
-      l.start_date ? new Date(l.start_date).toLocaleDateString() : "",
-      l.end_date ? new Date(l.end_date).toLocaleDateString() : "",
+      formatDate(l.start_date),
+      formatDate(l.end_date),
       l.reason || "",
       l.status || "",
-      l.createdAt ? new Date(l.createdAt).toLocaleDateString() : ""
+      formatDate(l.createdAt)
     ]);
     return { headers, rows };
   };
