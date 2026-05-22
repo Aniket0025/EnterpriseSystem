@@ -17,7 +17,7 @@ interface AuthContextType {
   session: Session | null;
   role: UserRole;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string, recaptchaToken?: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string, role?: string) => Promise<void>;
   signOut: () => Promise<void>;
   setupDemoAccount: (email: string, password: string, fullName: string, role: string) => Promise<void>;
@@ -69,10 +69,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, recaptchaToken?: string) => {
     const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password, recaptchaToken })
     });
     if (!res.ok) throw new Error(await res.text());
     

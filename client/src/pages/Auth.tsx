@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,12 +19,17 @@ export default function Auth() {
   const { signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await signIn(email, password);
+      let recaptchaToken: string | undefined = undefined;
+      if (executeRecaptcha) {
+        recaptchaToken = await executeRecaptcha("login");
+      }
+      await signIn(email, password, recaptchaToken);
       toast({ title: "Welcome back!" });
       navigate("/");
     } catch (err: any) {

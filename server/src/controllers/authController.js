@@ -56,7 +56,36 @@ export const registerUser = async (req, res) => {
 };
 
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, recaptchaToken } = req.body;
+
+  // reCAPTCHA v3 verification
+  const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+  if (recaptchaSecret) {
+    if (!recaptchaToken) {
+      return res.status(400).json({ message: 'reCAPTCHA verification is required.' });
+    }
+    try {
+      const axios = (await import('axios')).default;
+      const recaptchaRes = await axios.post(
+        `https://www.google.com/recaptcha/api/siteverify`,
+        null,
+        {
+          params: {
+            secret: recaptchaSecret,
+            response: recaptchaToken
+          }
+        }
+      );
+      const { success, score } = recaptchaRes.data;
+      if (!success || score < 0.5) {
+        console.warn(`🤖 Bot detected on login attempt! Score: ${score}`);
+        return res.status(403).json({ message: 'Bot traffic detected or low security score.' });
+      }
+    } catch (err) {
+      console.error('reCAPTCHA verification failure:', err.message);
+      // We can log the error and allow the login to proceed in case of Google API outages
+    }
+  }
 
   // Check database connection first
   if (!dbConnected) {

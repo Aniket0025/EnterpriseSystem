@@ -1,6 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { connectDB, dbConnected, dbConnectionError } from './src/config/db.js';
 
 // Load environment variables from explicit path
@@ -42,7 +44,30 @@ console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
 
 const app = express();
 
-// CORS configuration for production
+// 1. Helmet security headers (protects against Clickjacking, basic XSS, mime-sniffing)
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://www.google.com/recaptcha/", "https://www.gstatic.com/recaptcha/"],
+      frameSrc: ["'self'", "https://www.google.com/recaptcha/", "https://recaptcha.google.com/"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      objectSrc: ["'none'"]
+    }
+  }
+}));
+
+// 2. Rate Limiting Middleware (prevents brute-force on API routes)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes window
+  max: 150, // Limit each IP to 150 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many requests from this IP. Please try again in 15 minutes.' }
+});
+app.use('/api/', apiLimiter);
+
+// 3. Strict CORS configuration
 const corsOptions = {
   origin: process.env.CLIENT_URL || 'http://localhost:8080',
   credentials: true,
@@ -50,7 +75,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '10kb' })); // Max payload limit to prevent DoS via payload exhaustion
 
 app.use('/api/auth', authRoutes);
 app.use('/api/notifications', notificationRoutes);
