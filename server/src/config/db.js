@@ -13,6 +13,22 @@ export const connectDB = async (retries = 3) => {
       dbConnected = true;
       dbConnectionError = null;
       console.log(`MongoDB Connected: ${conn.connection.host}`);
+
+      // Drop leftover unique index 'user_id_1' in users collection if it exists
+      try {
+        const db = conn.connection.db;
+        const usersCollection = db.collection('users');
+        const indexes = await usersCollection.indexes();
+        const hasUserIdIndex = indexes.some(idx => idx.name === 'user_id_1');
+        if (hasUserIdIndex) {
+          console.log("Found leftover unique index 'user_id_1' in 'users' collection. Dropping it...");
+          await usersCollection.dropIndex('user_id_1');
+          console.log("Index 'user_id_1' successfully dropped on startup.");
+        }
+      } catch (indexError) {
+        console.error("Non-blocking index check error:", indexError.message);
+      }
+
       return conn;
     } catch (error) {
       dbConnected = false;
