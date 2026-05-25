@@ -67,9 +67,39 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
-// 3. Strict CORS configuration
+// 3. Robust CORS configuration supporting multiple origins
+const allowedOrigins = [
+  'http://localhost:8080',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://hr-portol-white-david23.vercel.app'
+];
+
+if (process.env.CLIENT_URL) {
+  // Support comma-separated list of origins
+  const envOrigins = process.env.CLIENT_URL.split(',').map(item => item.trim());
+  envOrigins.forEach(origin => {
+    if (origin && !allowedOrigins.includes(origin)) {
+      allowedOrigins.push(origin);
+    }
+  });
+}
+
 const corsOptions = {
-  origin: process.env.CLIENT_URL || 'http://localhost:8080',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, postman, server-to-server)
+    if (!origin) return callback(null, true);
+    
+    const isAllowed = allowedOrigins.includes(origin) || 
+                      origin.endsWith('.vercel.app') ||
+                      origin.startsWith('http://localhost:');
+                      
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200
 };
