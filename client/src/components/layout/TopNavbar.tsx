@@ -1,4 +1,5 @@
-import { Bell, Search, ChevronDown, Moon, Sun, LogOut } from "lucide-react";
+import { Bell, Search, ChevronDown, LogOut } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,6 @@ import { useNavigate } from "react-router-dom";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export function TopNavbar() {
-  const [darkMode, setDarkMode] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { user, role, signOut } = useAuth();
   const navigate = useNavigate();
@@ -45,11 +45,6 @@ export function TopNavbar() {
     return () => clearInterval(interval);
   }, [fetchUnreadCount]);
 
-  const toggleDark = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle("dark");
-  };
-
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
   const initials = displayName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
   const roleLabel = role.replace("_", " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
@@ -73,9 +68,7 @@ export function TopNavbar() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={toggleDark}>
-          {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </Button>
+        <ThemeToggle />
 
         <Button variant="ghost" size="icon" className="h-9 w-9 relative" onClick={() => navigate("/notifications")}>
           <Bell className="h-4 w-4" />
