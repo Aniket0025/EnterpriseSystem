@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { scrollToSection } from "@/lib/scrollToSection";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { 
   Users, 
   Banknote, 
@@ -28,21 +30,73 @@ const NAV_LINKS = [
   { label: "Contact", id: "contact" },
 ] as const;
 
+const FEATURES = [
+  {
+    title: "Employee Database",
+    description: "Centralize all employee records, contracts, and documents in one secure, easily accessible cloud workspace.",
+    icon: Users,
+    color: "blue",
+    details: ["Unified profiles", "Document sharing", "Custom fields"]
+  },
+  {
+    title: "Automated Payroll",
+    description: "Calculate salaries, tax deductions, bonuses, and deposits accurately and on time with automated batch processing.",
+    icon: Banknote,
+    color: "emerald",
+    details: ["Automated processing", "Detailed payslips", "Tax calculations"]
+  },
+  {
+    title: "Time & Attendance",
+    description: "Track employee check-ins/outs, manage leave requests, and monitor attendance patterns with smart shift tables.",
+    icon: CalendarDays,
+    color: "purple",
+    details: ["Shift calendars", "Leave approvals", "Real-time logs"]
+  },
+  {
+    title: "Performance Reviews",
+    description: "Set company goals, conduct feedback cycles, and track employee growth with custom assessment templates.",
+    icon: TrendingUp,
+    color: "amber",
+    details: ["Goal tracking", "Self-appraisals", "Growth metrics"]
+  },
+  {
+    title: "Compliance & Security",
+    description: "Protect sensitive HR data with enterprise-grade encryption, role-based access control, and audit logs.",
+    icon: ShieldCheck,
+    color: "rose",
+    details: ["GDPR & SOC2 compliance", "Access logs", "Data encryption"]
+  },
+  {
+    title: "Fast & Scalable",
+    description: "Built on high-performance cloud architecture to handle thousands of employees smoothly with 99.9% uptime.",
+    icon: Zap,
+    color: "indigo",
+    details: ["Sub-second latency", "API integrations", "High availability"]
+  }
+] as const;
+
+
 function NavLink({
   sectionId,
   label,
+  isActive,
   onNavigate,
   className,
 }: {
   sectionId: string;
   label: string;
+  isActive: boolean;
   onNavigate?: () => void;
   className?: string;
 }) {
   return (
     <a
       href={`#${sectionId}`}
-      className={className}
+      className={`${className} relative py-2 px-4 rounded-full transition-all duration-350 ${
+        isActive 
+          ? "text-blue-600 dark:text-blue-400 bg-blue-50/80 dark:bg-blue-950/40 font-semibold" 
+          : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/40 font-medium"
+      }`}
       onClick={(e) => {
         e.preventDefault();
         scrollToSection(sectionId);
@@ -50,13 +104,35 @@ function NavLink({
       }}
     >
       {label}
+      {isActive && (
+        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-650 dark:bg-blue-400 rounded-full shadow-sm" />
+      )}
     </a>
   );
 }
 
+
 export default function Landing() {
   const { user, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("");
+  
+  const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.message) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      toast.success("Thank you for your message! Our team will get back to you shortly.");
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    }, 1500);
+  };
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -65,10 +141,46 @@ export default function Landing() {
     }
   }, []);
 
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: "-25% 0px -55% 0px", // triggers when section enters the middle half of the screen
+      threshold: 0.05,
+    };
+
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(handleIntersection, observerOptions);
+
+    NAV_LINKS.forEach((link) => {
+      const element = document.getElementById(link.id);
+      if (element) observer.observe(element);
+    });
+
+    // Also fallback to scroll position for top/bottom detection
+    const handleScroll = () => {
+      if (window.scrollY < 100) {
+        setActiveSection("");
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans flex flex-col transition-colors">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-50 border-b border-slate-200 dark:border-slate-800">
+      <nav className="fixed top-0 w-full bg-white/70 dark:bg-slate-950/70 backdrop-blur-lg z-50 border-b border-slate-200/50 dark:border-slate-800/50 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <a
@@ -88,13 +200,14 @@ export default function Landing() {
               <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">HR Portal</span>
             </a>
             
-            <div className="hidden md:flex space-x-8 items-center">
+            <div className="hidden md:flex space-x-2 items-center">
               {NAV_LINKS.map((link) => (
                 <NavLink
                   key={link.id}
                   sectionId={link.id}
                   label={link.label}
-                  className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
+                  isActive={activeSection === link.id}
+                  className=""
                 />
               ))}
             </div>
@@ -109,13 +222,13 @@ export default function Landing() {
                       Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
-                  <Button onClick={() => signOut()} variant="ghost" className="hidden sm:inline-flex text-slate-600 dark:text-slate-300 hover:text-red-600 rounded-full px-4">
+                  <Button onClick={() => signOut()} variant="ghost" className="hidden sm:inline-flex text-slate-600 dark:text-slate-300 hover:text-red-600 rounded-full px-4 font-medium">
                     Logout
                   </Button>
                 </>
               ) : (
                 <Link to="/auth" className="hidden sm:block">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 shadow-md hover:shadow-lg transition-all">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 shadow-md hover:shadow-lg transition-all font-medium">
                     Login / Register
                   </Button>
                 </Link>
@@ -140,8 +253,9 @@ export default function Landing() {
                   key={link.id}
                   sectionId={link.id}
                   label={link.label}
+                  isActive={activeSection === link.id}
                   onNavigate={() => setMobileMenuOpen(false)}
-                  className="block px-2 py-2 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+                  className="block px-2 py-2"
                 />
               ))}
               {user ? (
@@ -237,177 +351,473 @@ export default function Landing() {
       </div>
 
       {/* Features Section */}
-      <section id="features" className="scroll-mt-20 py-24 bg-white dark:bg-slate-900 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">Everything you need to manage your team</h2>
-            <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+      <section id="features" className="scroll-mt-20 py-24 bg-white dark:bg-slate-900 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl">
+              Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">manage your team</span>
+            </h2>
+            <p className="mt-4 text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
               Powerful tools designed to simplify your human resources workflow, from recruitment to retirement.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-2xl hover:border-blue-100 dark:hover:border-blue-900 transition-all hover:-translate-y-2 duration-300 group">
-              <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Users className="h-7 w-7 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Employee Database</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Centralize all employee records, documents, and historical data in one secure, easily accessible platform.
-              </p>
-            </div>
+            {FEATURES.map((feature, idx) => {
+              const Icon = feature.icon;
+              const colorClasses = {
+                blue: {
+                  bg: "bg-blue-50/50 dark:bg-blue-950/20",
+                  border: "border-blue-100 dark:border-blue-900/30",
+                  text: "text-blue-600 dark:text-blue-400",
+                  hoverBorder: "hover:border-blue-300 dark:hover:border-blue-800",
+                  hoverShadow: "hover:shadow-blue-500/5",
+                  iconBg: "bg-blue-100 dark:bg-blue-900/50",
+                  badgeBg: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300",
+                },
+                emerald: {
+                  bg: "bg-emerald-50/50 dark:bg-emerald-950/20",
+                  border: "border-emerald-100 dark:border-emerald-900/30",
+                  text: "text-emerald-600 dark:text-emerald-400",
+                  hoverBorder: "hover:border-emerald-300 dark:hover:border-emerald-800",
+                  hoverShadow: "hover:shadow-emerald-500/5",
+                  iconBg: "bg-emerald-100 dark:bg-emerald-900/50",
+                  badgeBg: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300",
+                },
+                purple: {
+                  bg: "bg-purple-50/50 dark:bg-purple-950/20",
+                  border: "border-purple-100 dark:border-purple-900/30",
+                  text: "text-purple-600 dark:text-purple-400",
+                  hoverBorder: "hover:border-purple-300 dark:hover:border-purple-800",
+                  hoverShadow: "hover:shadow-purple-500/5",
+                  iconBg: "bg-purple-100 dark:bg-purple-900/50",
+                  badgeBg: "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300",
+                },
+                amber: {
+                  bg: "bg-amber-50/50 dark:bg-amber-950/20",
+                  border: "border-amber-100 dark:border-amber-900/30",
+                  text: "text-amber-600 dark:text-amber-400",
+                  hoverBorder: "hover:border-amber-300 dark:hover:border-amber-800",
+                  hoverShadow: "hover:shadow-amber-500/5",
+                  iconBg: "bg-amber-100 dark:bg-amber-900/50",
+                  badgeBg: "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300",
+                },
+                rose: {
+                  bg: "bg-rose-50/50 dark:bg-rose-950/20",
+                  border: "border-rose-100 dark:border-rose-900/30",
+                  text: "text-rose-600 dark:text-rose-400",
+                  hoverBorder: "hover:border-rose-300 dark:hover:border-rose-800",
+                  hoverShadow: "hover:shadow-rose-500/5",
+                  iconBg: "bg-rose-100 dark:bg-rose-900/50",
+                  badgeBg: "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300",
+                },
+                indigo: {
+                  bg: "bg-indigo-50/50 dark:bg-indigo-950/20",
+                  border: "border-indigo-100 dark:border-indigo-900/30",
+                  text: "text-indigo-600 dark:text-indigo-400",
+                  hoverBorder: "hover:border-indigo-300 dark:hover:border-indigo-800",
+                  hoverShadow: "hover:shadow-indigo-500/5",
+                  iconBg: "bg-indigo-100 dark:bg-indigo-900/50",
+                  badgeBg: "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300",
+                },
+              }[feature.color];
 
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-2xl hover:border-emerald-100 dark:hover:border-emerald-900 transition-all hover:-translate-y-2 duration-300 group">
-              <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Banknote className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Automated Payroll</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Run payroll accurately and on time with automated calculations, tax deductions, and direct deposits.
-              </p>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-2xl hover:border-purple-100 dark:hover:border-purple-900 transition-all hover:-translate-y-2 duration-300 group">
-              <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <CalendarDays className="h-7 w-7 text-purple-600 dark:text-purple-400" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Time & Attendance</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Track employee hours, manage leave requests, and monitor attendance patterns with intuitive tools.
-              </p>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-2xl hover:border-amber-100 dark:hover:border-amber-900 transition-all hover:-translate-y-2 duration-300 group">
-              <div className="w-14 h-14 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <TrendingUp className="h-7 w-7 text-amber-600 dark:text-amber-400" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Performance Reviews</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Set goals, conduct appraisals, and track employee growth with customizable review cycles and templates.
-              </p>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-2xl hover:border-rose-100 dark:hover:border-rose-900 transition-all hover:-translate-y-2 duration-300 group">
-              <div className="w-14 h-14 bg-rose-100 dark:bg-rose-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <ShieldCheck className="h-7 w-7 text-rose-600 dark:text-rose-400" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">Compliance & Security</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Rest easy knowing your organizational data is protected with enterprise-grade security and compliance tools.
-              </p>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-2xl hover:border-indigo-100 dark:hover:border-indigo-900 transition-all hover:-translate-y-2 duration-300 group">
-              <div className="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Zap className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Fast & Scalable</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Built on modern architecture, our platform scales effortlessly from small teams to large enterprises.
-              </p>
-            </div>
+              return (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  whileHover={{ y: -8 }}
+                  className={`group p-8 rounded-3xl bg-white/60 dark:bg-slate-900/40 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/40 ${colorClasses.hoverBorder} hover:shadow-2xl ${colorClasses.hoverShadow} transition-all duration-300 flex flex-col justify-between`}
+                >
+                  <div>
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110 group-hover:bg-gradient-to-r group-hover:text-white ${colorClasses.iconBg} ${feature.color === 'blue' ? 'group-hover:from-blue-600 group-hover:to-cyan-600' : feature.color === 'emerald' ? 'group-hover:from-emerald-600 group-hover:to-teal-600' : feature.color === 'purple' ? 'group-hover:from-purple-600 group-hover:to-indigo-600' : feature.color === 'amber' ? 'group-hover:from-amber-600 group-hover:to-orange-600' : feature.color === 'rose' ? 'group-hover:from-rose-600 group-hover:to-pink-600' : 'group-hover:from-indigo-600 group-hover:to-blue-600'}`}>
+                      <Icon className={`h-7 w-7 transition-all duration-300 group-hover:rotate-6 ${colorClasses.text} group-hover:text-white`} />
+                    </div>
+                    
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
+                      {feature.title}
+                    </h3>
+                    
+                    <p className="text-slate-650 dark:text-slate-400 leading-relaxed mb-6">
+                      {feature.description}
+                    </p>
+                  </div>
+                  
+                  <div className="border-t border-slate-100 dark:border-slate-800/80 pt-5 mt-auto">
+                    <ul className="flex flex-wrap gap-2">
+                      {feature.details.map((detail) => (
+                        <li key={detail} className={`text-xs font-semibold px-2.5 py-1 rounded-full border border-slate-200/10 ${colorClasses.badgeBg}`}>
+                          {detail}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Why Us Section */}
-      <section id="about" className="scroll-mt-20 py-24 bg-slate-50 dark:bg-slate-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">Why teams choose HR Portal</h2>
-            <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+      <section id="about" className="scroll-mt-20 py-24 bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808007_1px,transparent_1px),linear-gradient(to_bottom,#80808007_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl">
+              Why teams choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">HR Portal</span>
+            </h2>
+            <p className="mt-4 text-xl text-slate-650 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
               We combine powerful HR tools with an intuitive experience so your team can focus on people, not paperwork.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            {/* Left Column: Value Cards */}
+            <div className="lg:col-span-7 space-y-6">
               {[
-                "All-in-one platform — employees, payroll, leave, and performance in a single workspace",
-                "Role-based access — secure permissions for admins, HR, trainers, and staff",
-                "Real-time insights — dashboards and reports to make data-driven HR decisions",
-                "Built for growth — from startups to enterprises with thousands of employees",
-              ].map((text) => (
-                <div key={text} className="flex gap-4 items-start">
-                  <CheckCircle2 className="h-6 w-6 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                  <p className="text-slate-700 dark:text-slate-300 text-lg leading-relaxed">{text}</p>
-                </div>
+                {
+                  title: "All-in-One Workspace",
+                  desc: "Manage employees, automated payroll, shifts, and reviews in one unified workspace.",
+                  iconBg: "bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
+                },
+                {
+                  title: "Role-Based Security",
+                  desc: "Granular access permissions for admins, HR managers, supervisors, and employees.",
+                  iconBg: "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400",
+                },
+                {
+                  title: "Real-Time Actionable Insights",
+                  desc: "Visual payroll charts, attendance analytics, and dynamic reviews at your fingertips.",
+                  iconBg: "bg-purple-100 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400",
+                },
+                {
+                  title: "Built for Modern Scalability",
+                  desc: "Easily scales custom structures to handle startups or multi-branch global organizations.",
+                  iconBg: "bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400",
+                }
+              ].map((item, idx) => (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.5, delay: idx * 0.15 }}
+                  className="flex gap-5 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/40 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-lg transition-all duration-300 group"
+                >
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${item.iconBg} transition-transform group-hover:scale-115`}>
+                    <CheckCircle2 className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
+                </motion.div>
               ))}
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-lg">
+            {/* Right Column: Platform Preview & Stats */}
+            <div className="lg:col-span-5 space-y-8">
+              {/* Mock Dashboard Widget */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5 }}
+                className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/60 dark:border-slate-800/60 p-6 shadow-xl relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-xl pointer-events-none" />
+                
+                {/* Header of Mock widget */}
+                <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+                  <div>
+                    <div className="text-xs font-semibold text-slate-450 dark:text-slate-500 uppercase tracking-wider">Active Workspace</div>
+                    <div className="text-lg font-bold text-slate-800 dark:text-white">HR Summary</div>
+                  </div>
+                  <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900/30">
+                    Live System
+                  </span>
+                </div>
+
+                {/* Progress bars inside mock widget */}
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5 font-medium">
+                      <span className="text-slate-650 dark:text-slate-400">Payroll Processing</span>
+                      <span className="text-blue-650 dark:text-blue-400">92% Done</span>
+                    </div>
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div className="bg-blue-600 dark:bg-blue-500 h-full rounded-full transition-all" style={{ width: "92%" }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5 font-medium">
+                      <span className="text-slate-650 dark:text-slate-400">Leave Requests Approved</span>
+                      <span className="text-purple-650 dark:text-purple-400">98% Approved</span>
+                    </div>
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div className="bg-purple-600 dark:bg-purple-555 h-full rounded-full transition-all" style={{ width: "98%" }}></div>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-3 flex gap-4 items-center">
+                    <div className="flex -space-x-2.5 overflow-hidden">
+                      <div className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-blue-500 text-white font-bold text-xs flex items-center justify-center">A</div>
+                      <div className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-emerald-500 text-white font-bold text-xs flex items-center justify-center">S</div>
+                      <div className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-purple-500 text-white font-bold text-xs flex items-center justify-center">J</div>
+                      <div className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-amber-500 text-white font-bold text-xs flex items-center justify-center">+5</div>
+                    </div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                      Team onboarding status active
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Grid of Stats Cards */}
               <div className="grid grid-cols-2 gap-6">
-                <div className="text-center p-4">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">50%</div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">Less admin time</div>
-                </div>
-                <div className="text-center p-4">
-                  <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">3x</div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">Faster onboarding</div>
-                </div>
-                <div className="text-center p-4">
-                  <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">100%</div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">Cloud-based</div>
-                </div>
-                <div className="text-center p-4">
-                  <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">24/7</div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">Expert support</div>
-                </div>
+                {[
+                  { val: "50%", label: "Less admin time", color: "text-blue-600 dark:text-blue-400" },
+                  { val: "3x", label: "Faster onboarding", color: "text-emerald-600 dark:text-emerald-400" },
+                  { val: "100%", label: "Cloud security", color: "text-purple-600 dark:text-purple-400" },
+                  { val: "24/7", label: "Expert support", color: "text-amber-600 dark:text-amber-400" }
+                ].map((stat, idx) => (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ duration: 0.4, delay: idx * 0.1 }}
+                    whileHover={{ scale: 1.03 }}
+                    className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/40 hover:border-slate-350 dark:hover:border-slate-700 hover:shadow-md transition-all text-center"
+                  >
+                    <div className={`text-4xl font-extrabold ${stat.color} mb-1`}>{stat.val}</div>
+                    <div className="text-sm font-medium text-slate-500 dark:text-slate-400">{stat.label}</div>
+                  </motion.div>
+                ))}
               </div>
-              <p className="text-center text-slate-600 dark:text-slate-400 mt-6 text-sm">
-                Trusted by HR teams worldwide to simplify workforce management.
-              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="scroll-mt-20 py-24 bg-white dark:bg-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="contact" className="scroll-mt-20 py-24 bg-white dark:bg-slate-900 relative overflow-hidden">
+        {/* Background blobs */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/5 dark:bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/5 dark:bg-indigo-600/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">Get in touch</h2>
-            <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl">
+              Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">touch</span>
+            </h2>
+            <p className="mt-4 text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
               Have questions? Our team is here to help you get started with HR Portal.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <a
-              href="mailto:support@hrportal.com"
-              className="flex flex-col items-center text-center p-8 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-lg transition-all group"
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 max-w-6xl mx-auto">
+            {/* Left Column: Form */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="lg:col-span-7 bg-slate-50/50 dark:bg-slate-800/25 backdrop-blur-md p-8 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-xl"
             >
-              <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Mail className="h-7 w-7 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Email us</h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">support@hrportal.com</p>
-            </a>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Send us a message</h3>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="contact-name" className="block text-sm font-semibold text-slate-700 dark:text-slate-350 mb-2">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="contact-name"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="John Doe"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:ring-blue-500/30 dark:focus:border-blue-500 transition-all text-sm font-medium shadow-sm"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="contact-email" className="block text-sm font-semibold text-slate-700 dark:text-slate-350 mb-2">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      id="contact-email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="john@example.com"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:ring-blue-500/30 dark:focus:border-blue-500 transition-all text-sm font-medium shadow-sm"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="contact-subject" className="block text-sm font-semibold text-slate-700 dark:text-slate-350 mb-2">
+                    Subject
+                  </label>
+                  <input
+                    type="text"
+                    id="contact-subject"
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    placeholder="How can we help you?"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:ring-blue-500/30 dark:focus:border-blue-500 transition-all text-sm font-medium shadow-sm"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="contact-message" className="block text-sm font-semibold text-slate-700 dark:text-slate-350 mb-2">
+                    Message *
+                  </label>
+                  <textarea
+                    id="contact-message"
+                    required
+                    rows={4}
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    placeholder="Tell us details about your project or questions..."
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:ring-blue-500/30 dark:focus:border-blue-500 transition-all text-sm font-medium shadow-sm resize-none"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg hover:shadow-blue-500/25 transition-all text-sm font-semibold flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Sending Message...
+                    </>
+                  ) : (
+                    "Send Message"
+                  )}
+                </Button>
+              </form>
+            </motion.div>
 
-            <a
-              href="tel:+18005551234"
-              className="flex flex-col items-center text-center p-8 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-lg transition-all group"
-            >
-              <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Phone className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Call us</h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">+1 (800) 555-1234</p>
-            </a>
+            {/* Right Column: Info Panel */}
+            <div className="lg:col-span-5 flex flex-col justify-between gap-8">
+              <div className="space-y-6">
+                {/* Email Info Card */}
+                <motion.a
+                  href="mailto:info@whitedavid23.org"
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="flex items-center gap-5 p-6 rounded-2xl bg-slate-50/50 dark:bg-slate-800/20 border border-slate-200/50 dark:border-slate-800/50 hover:border-blue-300 dark:hover:border-blue-800 hover:shadow-lg transition-all duration-300 group"
+                >
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+                    <Mail className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider mb-0.5">Email us</h4>
+                    <p className="text-slate-600 dark:text-slate-350 font-semibold text-base break-all">info@whitedavid23.org</p>
+                  </div>
+                </motion.a>
 
-            <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700">
-              <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900/50 rounded-xl flex items-center justify-center mb-4">
-                <MapPin className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+                {/* Call Info Card */}
+                <motion.a
+                  href="tel:8757219471"
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="flex items-center gap-5 p-6 rounded-2xl bg-slate-50/50 dark:bg-slate-800/20 border border-slate-200/50 dark:border-slate-800/50 hover:border-emerald-300 dark:hover:border-emerald-800 hover:shadow-lg transition-all duration-300 group"
+                >
+                  <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+                    <Phone className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider mb-0.5">Call us</h4>
+                    <p className="text-slate-650 dark:text-slate-300 font-semibold text-base">8757219471</p>
+                  </div>
+                </motion.a>
+
+                {/* Visit Info Card */}
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="flex items-center gap-5 p-6 rounded-2xl bg-slate-50/50 dark:bg-slate-800/20 border border-slate-200/50 dark:border-slate-800/50 transition-all duration-300"
+                >
+                  <div className="w-12 h-12 bg-purple-100 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 rounded-xl flex items-center justify-center shrink-0">
+                    <MapPin className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider mb-0.5">Visit us</h4>
+                    <p className="text-slate-650 dark:text-slate-300 font-semibold text-base leading-snug">Indian, Jharkhand, Deoghar</p>
+                  </div>
+                </motion.div>
               </div>
-              <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Visit us</h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">123 Business Ave, Suite 100<br />San Francisco, CA 94105</p>
+
+              {/* Custom Mock Map Widget */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="bg-slate-100 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 h-44 relative overflow-hidden shadow-inner flex flex-col justify-end"
+              >
+                {/* Mock Map Vector Grid */}
+                <div className="absolute inset-0 opacity-20 dark:opacity-30 bg-[radial-gradient(#3b82f6_1.5px,transparent_1.5px)] bg-[size:16px_16px] pointer-events-none" />
+                
+                {/* Map Roads / Elements */}
+                <div className="absolute top-1/3 left-0 w-full h-2 bg-slate-200 dark:bg-slate-800 -rotate-12 transform pointer-events-none" />
+                <div className="absolute top-0 left-1/3 w-3 h-full bg-slate-200 dark:bg-slate-800 rotate-45 transform pointer-events-none" />
+                
+                {/* Marker with ping */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center">
+                  <span className="absolute inline-flex h-8 w-8 rounded-full bg-blue-500/30 animate-ping"></span>
+                  <div className="h-4 w-4 bg-blue-600 dark:bg-blue-500 rounded-full border-2 border-white dark:border-slate-900 shadow-md"></div>
+                </div>
+
+                <div className="bg-white/90 dark:bg-slate-950/90 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 relative z-20 flex justify-between items-center shadow-md">
+                  <div>
+                    <div className="text-xs font-bold text-slate-850 dark:text-white">Deoghar HQ</div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400">Jharkhand, India</div>
+                  </div>
+                  <a
+                    href="https://maps.google.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-semibold text-blue-650 dark:text-blue-450 hover:underline flex items-center gap-1"
+                  >
+                    Open Map
+                  </a>
+                </div>
+              </motion.div>
             </div>
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-16">
             {!user && (
               <Link to="/auth">
-                <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-8">
+                <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-8 shadow-md hover:shadow-lg transition-all font-semibold">
                   Start your free trial <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
