@@ -1,31 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { LogIn, UserPlus, Shield, Users, GraduationCap, Briefcase, BookOpen } from "lucide-react";
-
-const DEMO_ACCOUNTS = [
-  { role: "super_admin", label: "Super Admin", email: "superadmin@demo.com", password: "demo123456", icon: Shield, color: "bg-red-500" },
-  { role: "hr_admin", label: "HR Admin", email: "hradmin@demo.com", password: "demo123456", icon: Briefcase, color: "bg-blue-500" },
-  { role: "employee", label: "Employee", email: "employee@demo.com", password: "demo123456", icon: Users, color: "bg-green-500" },
-  { role: "trainer", label: "Trainer", email: "trainer@demo.com", password: "demo123456", icon: GraduationCap, color: "bg-purple-500" },
-  { role: "student", label: "Student", email: "student@demo.com", password: "demo123456", icon: BookOpen, color: "bg-amber-500" },
-];
+import { LogIn, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export default function Auth() {
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [selectedRole, setSelectedRole] = useState("employee");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [demoLoading, setDemoLoading] = useState<string | null>(null);
-  const { signIn, signUp, setupDemoAccount } = useAuth();
+  const { signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -33,13 +23,8 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (isSignUp) {
-        await signUp(email, password, fullName, selectedRole);
-        toast({ title: "Account created!", description: "You can now sign in." });
-      } else {
-        await signIn(email, password);
-        toast({ title: "Welcome back!" });
-      }
+      await signIn(email, password);
+      toast({ title: "Welcome back!" });
       navigate("/");
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -48,158 +33,128 @@ export default function Auth() {
     }
   };
 
-  const handleDemoLogin = async (demo: typeof DEMO_ACCOUNTS[0]) => {
-    setDemoLoading(demo.role);
-    try {
-      await setupDemoAccount(demo.email, demo.password, demo.label, demo.role);
-      toast({ title: `Logged in as ${demo.label}` });
-      navigate("/");
-    } catch (err: any) {
-      toast({ title: "Demo login failed", description: err.message, variant: "destructive" });
-    } finally {
-      setDemoLoading(null);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex items-center justify-center p-4">
+    <div className="relative min-h-screen bg-gradient-to-br from-background via-muted/40 to-background flex items-center justify-center p-4 overflow-hidden selection:bg-primary/20">
+      {/* Decorative Floating Ambient Glows */}
+      <div className="absolute -top-[30%] -left-[30%] w-[70%] h-[70%] rounded-full bg-primary/10 dark:bg-primary/15 blur-[120px] pointer-events-none animate-pulse" style={{ animationDuration: "15s" }} />
+      <div className="absolute -bottom-[30%] -right-[30%] w-[70%] h-[70%] rounded-full bg-indigo-500/10 dark:bg-indigo-500/15 blur-[120px] pointer-events-none animate-pulse" style={{ animationDuration: "20s" }} />
+      
+      {/* Modern Tech Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:16px_28px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
+
       <motion.div
-        className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6"
-        initial={{ opacity: 0, y: 20 }}
+        className="w-full max-w-md relative z-10"
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        {/* Sign In / Sign Up Form */}
-        <Card className="shadow-xl border-0 bg-card/80 backdrop-blur">
-          <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-3">
+        {/* Subtle Outer Glow behind Card */}
+        <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary to-indigo-500 opacity-10 dark:opacity-20 blur-xl pointer-events-none" />
+
+        {/* Premium Sign In Card */}
+        <Card className="relative shadow-2xl border border-border/80 dark:border-white/10 bg-card/75 dark:bg-slate-900/80 backdrop-blur-xl overflow-hidden rounded-2xl">
+          {/* Dynamic Top Edge Accent */}
+          <div className="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-primary via-indigo-500 to-purple-600" />
+          
+          <CardHeader className="text-center pb-3 pt-8">
+            {/* Secure portal capsule badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mx-auto mb-4">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+              Secure Portal Access
+            </div>
+
+            <div className="mx-auto mb-4 relative group">
+              {/* Logo outline glow effect */}
+              <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-primary to-indigo-500 opacity-30 group-hover:opacity-50 blur-sm transition-opacity duration-300" />
               <img 
-                src="/logo.png" 
+                src={logo} 
                 alt="HR Portal Logo" 
-                className="h-20 w-20 rounded-xl mx-auto"
+                className="relative h-20 w-20 rounded-xl mx-auto border border-border bg-background shadow-lg object-contain p-1"
               />
             </div>
-            <CardTitle className="text-2xl">
-              {isSignUp ? "Create Account" : "Welcome Back"}
+            
+            <CardTitle className="text-2xl font-bold tracking-tight text-foreground mt-2">
+              Welcome Back
             </CardTitle>
-            <CardDescription>
-              {isSignUp ? "Sign up to access the HR & ERP System" : "Sign in to your account"}
+            <CardDescription className="text-muted-foreground text-sm mt-1">
+              Sign in to your account to access the workspace
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <AnimatePresence mode="wait">
-                {isSignUp && (
-                  <motion.div
-                    key="name"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                  >
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="John Doe" required />
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@company.com" required />
+          <CardContent className="pb-8 px-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              
+              {/* Email Address */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium text-foreground/80">Email Address</Label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground/60 group-focus-within:text-primary transition-colors duration-200">
+                    <Mail className="h-4.5 w-4.5" />
+                  </div>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="you@company.com"
+                    required
+                    className="pl-11 bg-background/50 border-input text-foreground placeholder-muted-foreground/50 focus-visible:ring-primary/20 focus-visible:ring-2 focus-visible:border-primary transition-all duration-300 rounded-xl"
+                  />
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
+              {/* Password */}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium text-foreground/80">Password</Label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground/60 group-focus-within:text-primary transition-colors duration-200">
+                    <Lock className="h-4.5 w-4.5" />
+                  </div>
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                    className="pl-11 pr-11 bg-background/50 border-input text-foreground placeholder-muted-foreground/50 focus-visible:ring-primary/20 focus-visible:ring-2 focus-visible:border-primary transition-all duration-300 rounded-xl"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-muted-foreground/60 hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+                  </button>
+                </div>
               </div>
 
-              <AnimatePresence mode="wait">
-                {isSignUp && (
-                  <motion.div
-                    key="role"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                  >
-                    <Label>Role</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-1">
-                      {["employee", "trainer", "student"].map(role => (
-                        <Button
-                          key={role}
-                          type="button"
-                          variant={selectedRole === role ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setSelectedRole(role)}
-                          className="capitalize"
-                        >
-                          {role}
-                        </Button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <Button type="submit" className="w-full" disabled={loading}>
+              {/* Submit Button */}
+              <Button 
+                type="submit" 
+                className="w-full relative overflow-hidden bg-primary hover:bg-primary/95 text-primary-foreground font-semibold py-2.5 h-11 transition-all duration-300 hover:shadow-[0_4px_20px_rgba(99,102,241,0.25)] hover:scale-[1.01] active:scale-[0.99] rounded-xl flex items-center justify-center gap-2 mt-2" 
+                disabled={loading}
+              >
                 {loading ? (
-                  <motion.div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.8 }} />
-                ) : isSignUp ? (
-                  <><UserPlus className="mr-2 h-4 w-4" /> Sign Up</>
+                  <motion.div 
+                    className="h-5 w-5 border-2 border-current border-t-transparent rounded-full" 
+                    animate={{ rotate: 360 }} 
+                    transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }} 
+                  />
                 ) : (
-                  <><LogIn className="mr-2 h-4 w-4" /> Sign In</>
+                  <>
+                    <LogIn className="h-4.5 w-4.5" /> 
+                    <span>Sign In</span>
+                  </>
                 )}
               </Button>
             </form>
 
-            <div className="mt-4 text-center">
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-sm text-primary hover:underline"
-              >
-                {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Demo Login Section */}
-        <Card className="shadow-xl border-0 bg-card/80 backdrop-blur">
-          <CardHeader className="text-center pb-2">
-            <CardTitle className="text-xl">Quick Demo Login</CardTitle>
-            <CardDescription>Try the system with different roles — no signup needed</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {DEMO_ACCOUNTS.map(demo => (
-              <motion.div key={demo.role} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start h-auto py-3 px-4"
-                  onClick={() => handleDemoLogin(demo)}
-                  disabled={demoLoading !== null}
-                >
-                  <div className={`h-9 w-9 rounded-lg ${demo.color} flex items-center justify-center mr-3 shrink-0`}>
-                    <demo.icon className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="text-left flex-1">
-                    <div className="font-medium text-sm">{demo.label}</div>
-                    <div className="text-xs text-muted-foreground">{demo.email}</div>
-                  </div>
-                  {demoLoading === demo.role && (
-                    <motion.div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.8 }} />
-                  )}
-                </Button>
-              </motion.div>
-            ))}
-
-            <div className="mt-4 p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground">
-              <p className="font-medium mb-1">Role Permissions:</p>
-              <ul className="space-y-1">
-                <li><strong>Super Admin:</strong> Full system control</li>
-                <li><strong>HR Admin:</strong> Manage employees, payroll, recruitment</li>
-                <li><strong>Employee:</strong> View tasks, submit reports, apply leave</li>
-                <li><strong>Trainer:</strong> Manage batches, track performance</li>
-                <li><strong>Student:</strong> View batches, submit reports, attendance</li>
-              </ul>
+            {/* Trusted Security Banner */}
+            <div className="mt-8 pt-5 border-t border-border/60 flex items-center justify-center gap-1.5 text-xs text-muted-foreground/80">
+              <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
+              <span>Enterprise-grade 256-bit SSL protection</span>
             </div>
           </CardContent>
         </Card>
@@ -207,3 +162,4 @@ export default function Auth() {
     </div>
   );
 }
+

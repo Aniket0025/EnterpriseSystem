@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ShieldCheck, Zap, Users, Banknote, CalendarDays, TrendingUp, Globe, Mail, Phone, MapPin, Clock } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const pages: Record<string, { title: string; content: React.ReactNode }> = {
   features: {
@@ -312,7 +313,7 @@ export default function FooterPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="HR Portal Logo" className="h-16 w-16 rounded-xl" />
+              <img src={logo} alt="HR Portal Logo" className="h-12 w-12 object-contain" />
               <span className="text-xl font-bold text-slate-900 tracking-tight">HR Portal</span>
             </div>
             <Link to="/">

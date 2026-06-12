@@ -10,7 +10,7 @@ export interface Session {
   token: string;
 }
 
-type UserRole = "super_admin" | "hr_admin" | "employee" | "trainer" | "student";
+type UserRole = "super_admin" | "hr_admin" | "employee" | "trainer" | "student" | "intern";
 
 interface AuthContextType {
   user: User | null;
@@ -48,14 +48,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setRole(userData.role);
           } else {
             localStorage.removeItem("token");
+            setUser(null);
+            setSession(null);
           }
         } catch (error) {
           console.error("Auth init failed", error);
         }
+      } else {
+        setUser(null);
+        setSession(null);
       }
       setLoading(false);
     };
+
     initAuth();
+
+    window.addEventListener("auth-change", initAuth);
+    return () => {
+      window.removeEventListener("auth-change", initAuth);
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {

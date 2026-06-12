@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/sidebar";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import logo from "@/assets/logo.png";
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -42,20 +43,23 @@ export function AppSidebar() {
   
   const isHR = role === "super_admin" || role === "hr_admin";
 
+  const showBatches = role !== "employee" && role !== "student" && role !== "intern";
+  const showAttendance = role !== "employee";
+
   const mainNav = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
     ...(isHR ? [{ title: "Employees", url: "/employees", icon: Users }] : []),
     ...(isHR ? [{ title: "Trainers", url: "/trainers", icon: GraduationCap }] : []),
     ...(isHR ? [{ title: "Students", url: "/students", icon: BookOpen }] : []),
     ...(isHR ? [{ title: "Interns", url: "/interns", icon: Briefcase }] : []),
-    { title: "Batches", url: "/batches", icon: Layers },
+    ...(showBatches ? [{ title: "Batches", url: "/batches", icon: Layers }] : []),
   ];
 
   const workNav = [
     { title: "Tasks", url: "/tasks", icon: CheckSquare },
     { title: "Daily Reports", url: "/daily-reports", icon: FileText },
     { title: "Leave", url: "/leave", icon: CalendarOff },
-    { title: "Attendance", url: "/attendance", icon: Clock },
+    ...(showAttendance ? [{ title: "Attendance", url: "/attendance", icon: Clock }] : []),
   ];
 
   const hrNav = isHR ? [
@@ -107,7 +111,7 @@ export function AppSidebar() {
           transition={{ delay: 0.1 }}
         >
           <img 
-            src="/logo.png" 
+            src={logo} 
             alt="HR Portal Logo" 
             className="h-10 w-10 md:h-12 md:w-12 rounded-lg shrink-0 object-contain"
           />
