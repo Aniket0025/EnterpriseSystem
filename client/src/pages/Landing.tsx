@@ -12,6 +12,7 @@ import {
   CalendarDays, 
   TrendingUp, 
   ArrowRight,
+  ArrowUp,
   ShieldCheck,
   Zap,
   Globe,
@@ -116,6 +117,11 @@ export default function Landing() {
   const { user, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -168,6 +174,7 @@ export default function Landing() {
       if (window.scrollY < 100) {
         setActiveSection("");
       }
+      setShowScrollTop(window.scrollY > 300);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
 
@@ -282,7 +289,7 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <div className="pt-32 pb-20 lg:pt-48 lg:pb-32 px-4 overflow-hidden relative flex-grow">
+      <div className="pt-32 pb-12 lg:pt-40 lg:pb-16 px-4 overflow-hidden relative flex-grow">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full overflow-hidden -z-10 pointer-events-none">
           <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-3xl opacity-60 mix-blend-multiply dark:mix-blend-normal animate-blob"></div>
           <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-purple-400/20 dark:bg-purple-600/10 rounded-full blur-3xl opacity-60 mix-blend-multiply dark:mix-blend-normal animate-blob [animation-delay:2s]"></div>
@@ -329,7 +336,7 @@ export default function Landing() {
             </Button>
           </div>
           
-          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 py-8 border-t border-slate-200 dark:border-slate-800 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 delay-500">
+          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-8 py-8 border-t border-slate-200 dark:border-slate-800 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 delay-500">
              <div className="flex flex-col items-center">
                <div className="text-4xl font-bold text-slate-900 dark:text-white mb-1">99.9%</div>
                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Uptime</div>
@@ -351,12 +358,12 @@ export default function Landing() {
       </div>
 
       {/* Features Section */}
-      <section id="features" className="scroll-mt-20 py-24 bg-white dark:bg-slate-900 relative overflow-hidden">
+      <section id="features" className="scroll-mt-20 py-16 bg-white dark:bg-slate-900 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-20">
+          <div className="text-center mb-12">
             <h2 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl">
               Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">manage your team</span>
             </h2>
@@ -466,12 +473,12 @@ export default function Landing() {
       </section>
 
       {/* Why Us Section */}
-      <section id="about" className="scroll-mt-20 py-24 bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
+      <section id="about" className="scroll-mt-20 py-16 bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808007_1px,transparent_1px),linear-gradient(to_bottom,#80808007_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-20">
+          <div className="text-center mb-12">
             <h2 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl">
               Why teams choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">HR Portal</span>
             </h2>
@@ -615,13 +622,13 @@ export default function Landing() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="scroll-mt-20 py-24 bg-white dark:bg-slate-900 relative overflow-hidden">
+      <section id="contact" className="scroll-mt-20 py-16 bg-white dark:bg-slate-900 relative overflow-hidden">
         {/* Background blobs */}
         <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/5 dark:bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/5 dark:bg-indigo-600/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10">
             <h2 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl">
               Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">touch</span>
             </h2>
@@ -770,39 +777,35 @@ export default function Landing() {
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider mb-0.5">Visit us</h4>
-                    <p className="text-slate-650 dark:text-slate-300 font-semibold text-base leading-snug">Indian, Jharkhand, Deoghar</p>
+                    <p className="text-slate-650 dark:text-slate-300 font-semibold text-base leading-snug">India, Jharkhand, Deoghar</p>
                   </div>
                 </motion.div>
               </div>
 
-              {/* Custom Mock Map Widget */}
+              {/* Embedded Google Map Widget */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="bg-slate-100 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 h-44 relative overflow-hidden shadow-inner flex flex-col justify-end"
+                className="bg-slate-100 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-inner h-60 relative group"
               >
-                {/* Mock Map Vector Grid */}
-                <div className="absolute inset-0 opacity-20 dark:opacity-30 bg-[radial-gradient(#3b82f6_1.5px,transparent_1.5px)] bg-[size:16px_16px] pointer-events-none" />
-                
-                {/* Map Roads / Elements */}
-                <div className="absolute top-1/3 left-0 w-full h-2 bg-slate-200 dark:bg-slate-800 -rotate-12 transform pointer-events-none" />
-                <div className="absolute top-0 left-1/3 w-3 h-full bg-slate-200 dark:bg-slate-800 rotate-45 transform pointer-events-none" />
-                
-                {/* Marker with ping */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center">
-                  <span className="absolute inline-flex h-8 w-8 rounded-full bg-blue-500/30 animate-ping"></span>
-                  <div className="h-4 w-4 bg-blue-600 dark:bg-blue-500 rounded-full border-2 border-white dark:border-slate-900 shadow-md"></div>
-                </div>
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3631.0099823603978!2d86.69224767535889!3d24.48511097817625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f13ddadc3ca69b%3A0x7219c4be9bdd9e19!2sWhiteDavid23!5e0!3m2!1sen!2sin!4v1781268357631!5m2!1sen!2sin" 
+                  className="w-full h-full border-0 grayscale dark:invert-[90%] dark:hue-rotate-[180deg] transition-all duration-300 group-hover:grayscale-0 dark:group-hover:invert-0 dark:group-hover:hue-rotate-0" 
+                  allowFullScreen={true}
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="WhiteDavid23 Location Map"
+                />
 
-                <div className="bg-white/90 dark:bg-slate-950/90 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 relative z-20 flex justify-between items-center shadow-md">
+                <div className="absolute bottom-3 left-3 right-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 relative z-20 flex justify-between items-center shadow-md">
                   <div>
                     <div className="text-xs font-bold text-slate-850 dark:text-white">Deoghar HQ</div>
                     <div className="text-[10px] text-slate-500 dark:text-slate-400">Jharkhand, India</div>
                   </div>
                   <a
-                    href="https://maps.google.com"
+                    href="https://www.google.com/maps/place/WhiteDavid23/@24.485111,86.692248,16z"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs font-semibold text-blue-650 dark:text-blue-450 hover:underline flex items-center gap-1"
@@ -814,7 +817,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="text-center mt-16">
+          <div className="text-center mt-10">
             {!user && (
               <Link to="/auth">
                 <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-8 shadow-md hover:shadow-lg transition-all font-semibold">
@@ -827,7 +830,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-950 py-16 text-slate-400 mt-auto">
+      <footer className="bg-slate-950 py-12 text-slate-400 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 border-b border-slate-800 pb-12">
              <div className="col-span-1 md:col-span-1">
@@ -894,6 +897,22 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            onClick={scrollToTop}
+            className="fixed bottom-6 left-6 z-50 p-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl hover:shadow-blue-500/30 transition-all hover:-translate-y-1 group"
+            aria-label="Scroll to top"
+          >
+            <ArrowUp className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-0.5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
