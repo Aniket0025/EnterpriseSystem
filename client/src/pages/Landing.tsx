@@ -289,7 +289,7 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <div className="pt-32 pb-12 lg:pt-40 lg:pb-16 px-4 overflow-hidden relative flex-grow">
+      <div className="pt-20 pb-12 lg:pt-24 lg:pb-16 px-4 overflow-hidden relative flex-grow">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full overflow-hidden -z-10 pointer-events-none">
           <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-3xl opacity-60 mix-blend-multiply dark:mix-blend-normal animate-blob"></div>
           <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-purple-400/20 dark:bg-purple-600/10 rounded-full blur-3xl opacity-60 mix-blend-multiply dark:mix-blend-normal animate-blob [animation-delay:2s]"></div>
@@ -297,14 +297,14 @@ export default function Landing() {
         </div>
 
         <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-medium text-sm mb-8 border border-blue-100 dark:border-blue-900 shadow-sm transition-all hover:shadow-md animate-in fade-in slide-in-from-bottom-3 duration-500">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-medium text-sm mb-4 border border-blue-100 dark:border-blue-900 shadow-sm transition-all hover:shadow-md animate-in fade-in slide-in-from-bottom-3 duration-500">
             <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
             Modernize your workforce management
           </div>
-          <h1 className="text-5xl lg:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-6 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h1 className="text-5xl lg:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-4 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
             The Complete Platform for <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">HR Excellence</span>
           </h1>
-          <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-5 duration-700 delay-150">
+          <p className="text-xl text-slate-600 dark:text-slate-400 mb-6 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-5 duration-700 delay-150">
             Streamline employee management, payroll, tracking, and performance all in one unified, intelligent workspace designed for modern forward-thinking teams.
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">

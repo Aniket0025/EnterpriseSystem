@@ -76,8 +76,14 @@ export const loginUser = async (req, res) => {
           }
         }
       );
-      const { success, score } = recaptchaRes.data;
-      if (!success || score < 0.5) {
+      const { success, score, 'error-codes': errorCodes } = recaptchaRes.data || {};
+      const isTimeoutOrDuplicate = errorCodes && errorCodes.includes('timeout-or-duplicate');
+
+      if (!success && !isTimeoutOrDuplicate) {
+        console.warn(`🤖 Bot detected on login attempt! Score: ${score}, Errors: ${errorCodes}`);
+        return res.status(403).json({ message: 'Bot traffic detected or low security score.' });
+      }
+      if (success && score < 0.5) {
         console.warn(`🤖 Bot detected on login attempt! Score: ${score}`);
         return res.status(403).json({ message: 'Bot traffic detected or low security score.' });
       }

@@ -113,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setRole("employee");
     localStorage.removeItem("token");
+    window.location.href = "/";
   };
 
   return (
