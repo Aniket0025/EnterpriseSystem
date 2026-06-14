@@ -817,15 +817,6 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="text-center mt-10">
-            {!user && (
-              <Link to="/auth">
-                <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-8 shadow-md hover:shadow-lg transition-all font-semibold">
-                  Start your free trial <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            )}
-          </div>
         </div>
       </section>
 
