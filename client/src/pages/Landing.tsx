@@ -906,7 +906,7 @@ export default function Landing() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             onClick={scrollToTop}
-            className="fixed bottom-6 left-6 z-50 p-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl hover:shadow-blue-500/30 transition-all hover:-translate-y-1 group"
+            className="fixed bottom-6 right-6 z-50 p-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl hover:shadow-blue-500/30 transition-all hover:-translate-y-1 group"
             aria-label="Scroll to top"
           >
             <ArrowUp className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-0.5" />
