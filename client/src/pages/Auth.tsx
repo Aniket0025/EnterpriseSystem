@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
@@ -16,20 +16,20 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isHuman, setIsHuman] = useState(false);
   const { signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isHuman) {
+      toast({ title: "Verification required", description: "Please confirm you are not a robot.", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     try {
-      let recaptchaToken: string | undefined = undefined;
-      if (executeRecaptcha) {
-        recaptchaToken = await executeRecaptcha("login");
-      }
-      await signIn(email, password, recaptchaToken);
+      await signIn(email, password, "human-verified-checkbox");
       toast({ title: "Welcome back!" });
       navigate("/");
     } catch (err: any) {
@@ -136,11 +136,33 @@ export default function Auth() {
                 </div>
               </div>
 
+              {/* Human Verification Checkbox */}
+              <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 shadow-sm my-4">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    id="human-verification"
+                    checked={isHuman}
+                    onCheckedChange={(checked) => setIsHuman(!!checked)}
+                    className="h-5 w-5 rounded border-slate-350 text-blue-650 focus:ring-blue-500"
+                  />
+                  <Label
+                    htmlFor="human-verification"
+                    className="text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none"
+                  >
+                    I'm not a robot
+                  </Label>
+                </div>
+                <div className="flex flex-col items-end opacity-60">
+                  <ShieldCheck className="h-5 w-5 text-blue-500" />
+                  <span className="text-[9px] text-slate-400 mt-0.5">Secure Checkbox</span>
+                </div>
+              </div>
+
               {/* Submit Button */}
               <Button 
                 type="submit" 
                 className="w-full relative overflow-hidden bg-primary hover:bg-primary/95 text-primary-foreground font-semibold py-2.5 h-11 transition-all duration-300 hover:shadow-[0_4px_20px_rgba(99,102,241,0.25)] hover:scale-[1.01] active:scale-[0.99] rounded-xl flex items-center justify-center gap-2 mt-2" 
-                disabled={loading}
+                disabled={loading || !isHuman}
               >
                 {loading ? (
                   <motion.div 
