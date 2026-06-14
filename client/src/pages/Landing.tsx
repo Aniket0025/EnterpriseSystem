@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { scrollToSection } from "@/lib/scrollToSection";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { toast } from "sonner";
 import { 
   Users, 
@@ -109,6 +109,62 @@ function NavLink({
         <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-650 dark:bg-blue-400 rounded-full shadow-sm" />
       )}
     </a>
+  );
+}
+
+function CountUpNumber({ 
+  target, 
+  decimals = 0, 
+  suffix = "", 
+  prefix = "" 
+}: { 
+  target: number; 
+  decimals?: number; 
+  suffix?: string; 
+  prefix?: string; 
+}) {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+  useEffect(() => {
+    if (!isInView) return;
+
+    let start = 0;
+    const end = target;
+    const duration = 2000; // 2 seconds
+    const startTime = performance.now();
+
+    const updateNumber = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing out quad
+      const easeOutQuad = (t: number) => t * (2 - t);
+      const easedProgress = easeOutQuad(progress);
+
+      const currentValue = start + (end - start) * easedProgress;
+      setCount(currentValue);
+
+      if (progress < 1) {
+        requestAnimationFrame(updateNumber);
+      } else {
+        setCount(end);
+      }
+    };
+
+    requestAnimationFrame(updateNumber);
+  }, [isInView, target]);
+
+  const formattedCount = count.toFixed(decimals);
+  const displayValue = decimals > 0 && formattedCount.endsWith(".0") ? count.toFixed(0) : formattedCount;
+
+  return (
+    <span ref={ref}>
+      {prefix}
+      {displayValue}
+      {suffix}
+    </span>
   );
 }
 
@@ -338,19 +394,27 @@ export default function Landing() {
           
           <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-8 py-8 border-t border-slate-200 dark:border-slate-800 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 delay-500">
              <div className="flex flex-col items-center">
-               <div className="text-4xl font-bold text-slate-900 dark:text-white mb-1">99.9%</div>
+               <div className="text-4xl font-bold text-slate-900 dark:text-white mb-1">
+                 <CountUpNumber target={99.9} decimals={1} suffix="%" />
+               </div>
                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Uptime</div>
              </div>
              <div className="flex flex-col items-center">
-               <div className="text-4xl font-bold text-slate-900 dark:text-white mb-1">10k+</div>
+               <div className="text-4xl font-bold text-slate-900 dark:text-white mb-1">
+                 <CountUpNumber target={10} suffix="k+" />
+               </div>
                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Companies</div>
              </div>
              <div className="flex flex-col items-center">
-               <div className="text-4xl font-bold text-slate-900 dark:text-white mb-1">1M+</div>
+               <div className="text-4xl font-bold text-slate-900 dark:text-white mb-1">
+                 <CountUpNumber target={1} decimals={1} suffix="M+" />
+               </div>
                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Employees Managed</div>
              </div>
              <div className="flex flex-col items-center">
-               <div className="text-4xl font-bold text-slate-900 dark:text-white mb-1">24/7</div>
+               <div className="text-4xl font-bold text-slate-900 dark:text-white mb-1">
+                 <CountUpNumber target={24} suffix="/7" />
+               </div>
                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Support</div>
              </div>
           </div>
@@ -792,7 +856,7 @@ export default function Landing() {
               >
                 <iframe 
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3631.0099823603978!2d86.69224767535889!3d24.48511097817625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f13ddadc3ca69b%3A0x7219c4be9bdd9e19!2sWhiteDavid23!5e0!3m2!1sen!2sin!4v1781268357631!5m2!1sen!2sin" 
-                  className="w-full h-full border-0 grayscale dark:invert-[90%] dark:hue-rotate-[180deg] transition-all duration-300 group-hover:grayscale-0 dark:group-hover:invert-0 dark:group-hover:hue-rotate-0" 
+                  className="w-full h-full border-0" 
                   allowFullScreen={true}
                   loading="lazy" 
                   referrerPolicy="no-referrer-when-downgrade"
