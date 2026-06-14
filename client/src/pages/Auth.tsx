@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { LogIn, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { LogIn, Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowLeft } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 export default function Auth() {
@@ -41,6 +41,15 @@ export default function Auth() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-background via-muted/40 to-background flex items-center justify-center p-4 overflow-hidden selection:bg-primary/20">
+      {/* Back Button */}
+      <Link 
+        to="/" 
+        className="absolute top-6 left-6 z-20 flex items-center gap-2 text-sm font-semibold text-slate-650 dark:text-slate-350 hover:text-blue-600 dark:hover:text-blue-405 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-800/40 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-slate-200/60 dark:border-slate-800/60 shadow-sm"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Home
+      </Link>
+
       {/* Decorative Floating Ambient Glows */}
       <div className="absolute -top-[30%] -left-[30%] w-[70%] h-[70%] rounded-full bg-primary/10 dark:bg-primary/15 blur-[120px] pointer-events-none animate-pulse" style={{ animationDuration: "15s" }} />
       <div className="absolute -bottom-[30%] -right-[30%] w-[70%] h-[70%] rounded-full bg-indigo-500/10 dark:bg-indigo-500/15 blur-[120px] pointer-events-none animate-pulse" style={{ animationDuration: "20s" }} />
@@ -137,13 +146,13 @@ export default function Auth() {
               </div>
 
               {/* Human Verification Checkbox */}
-              <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 shadow-sm my-4">
+              <div className="flex items-center justify-between p-4 rounded-xl border border-slate-300 dark:border-slate-650 bg-slate-50/50 dark:bg-slate-950/50 shadow-sm my-4">
                 <div className="flex items-center gap-3">
                   <Checkbox
                     id="human-verification"
                     checked={isHuman}
                     onCheckedChange={(checked) => setIsHuman(!!checked)}
-                    className="h-5 w-5 rounded border-slate-350 text-blue-650 focus:ring-blue-500"
+                    className="h-5 w-5 rounded border-slate-400 dark:border-slate-550 text-blue-650 focus:ring-blue-500"
                   />
                   <Label
                     htmlFor="human-verification"
